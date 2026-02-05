@@ -17,7 +17,7 @@
                             alt="{{ config('app.name') }}" />
                     @else
                         <img style="height: 3rem; width: auto; filter: brightness(0) invert(1);"
-                            src="{{ url('images/logo_3lackd.png') }}" alt="{{ config('app.name') }}" />
+                            src="{{ url('images/logo_mebuki.png') }}" alt="{{ config('app.name') }}" />
                     @endif
                 </div>
 
@@ -25,7 +25,7 @@
                     <h1
                         style="font-size: 3.5rem; font-weight: 800; color: white; line-height: 1.2; margin: 0; text-shadow: 0 4px 6px rgba(0,0,0,0.3);">
                         Impulsione suas Vendas<br />
-                        <span style="color: var(--brand-color, #0e90d9);">com Inteligência.</span>
+                        <span style="color: var(--brand-color, #046c8e);">com Inteligência.</span>
                     </h1>
                     <p
                         style="margin-top: 1.5rem; max-width: 450px; font-size: 1.125rem; color: rgba(255,255,255,0.9); line-height: 1.6; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
@@ -35,7 +35,7 @@
                 </div>
 
                 <div style="position: relative; z-index: 10; font-size: 0.875rem; color: rgba(255,255,255,0.7);">
-                    © {{ date('Y') }} 3lackd Serviços de Tecnologia.
+                    © {{ date('Y') }} Mebuki.
                 </div>
             </div>
 
@@ -52,7 +52,7 @@
                             <img style="height: 2.5rem; width: auto;" src="{{ Storage::url($logo) }}"
                                 alt="{{ config('app.name') }}" />
                         @else
-                            <img style="height: 2.5rem; width: auto;" src="{{ url('images/logo_3lackd.png') }}"
+                            <img style="height: 2.5rem; width: auto;" src="{{ url('images/logo_mebuki.png') }}"
                                 alt="{{ config('app.name') }}" />
                         @endif
                     </div>
@@ -98,7 +98,7 @@
                                             @lang('admin::app.users.login.password')
                                         </x-admin::form.control-group.label>
 
-                                        <a style="font-size: 0.75rem; font-weight: 700; color: var(--brand-color, #0e90d9); text-decoration: none;"
+                                        <a style="font-size: 0.75rem; font-weight: 700; color: var(--brand-color, #046c8e); text-decoration: none;"
                                             href="{{ route('admin.forgot_password.create') }}">
                                             @lang('admin::app.users.login.forget-password-link')
                                         </a>
@@ -123,7 +123,7 @@
 
                                 <!-- Submit Button -->
                                 <button class="primary-button"
-                                    style="width: 100%; height: 3.25rem; border-radius: 0.75rem; border: none; color: white; background: var(--brand-color, #0e90d9); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 15px -3px rgba(var(--brand-rgb, 14, 144, 217), 0.3);"
+                                    style="width: 100%; height: 3.25rem; border-radius: 0.75rem; border: none; color: white; background: var(--brand-color, #046c8e); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 15px -3px rgba(var(--brand-rgb, 4, 108, 142), 0.3);"
                                     aria-label="{{ trans('admin::app.users.login.submit-btn')}}">
                                     @lang('admin::app.users.login.submit-btn')
                                 </button>
@@ -159,8 +159,8 @@
 
             input:focus {
                 outline: none;
-                border-color: var(--brand-color, #0e90d9) !important;
-                box-shadow: 0 0 0 3px rgba(var(--brand-rgb, 14, 144, 217), 0.1) !important;
+                border-color: var(--brand-color, #046c8e) !important;
+                box-shadow: 0 0 0 3px rgba(var(--brand-rgb, 4, 108, 142), 0.1) !important;
             }
         </style>
 

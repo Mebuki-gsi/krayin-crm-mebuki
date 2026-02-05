@@ -37,7 +37,7 @@
     @if ($favicon = core()->getConfigData('general.design.admin_logo.favicon'))
         <link type="image/x-icon" href="{{ Storage::url($favicon) }}" rel="shortcut icon" sizes="16x16">
     @else
-        <link type="image/x-icon" href="{{ url('images/logo_3lackd.png') }}" rel="shortcut icon" sizes="16x16" />
+        <link type="image/x-icon" href="{{ url('images/logo_mebuki.png') }}" rel="shortcut icon" sizes="16x16" />
     @endif
 
     @php

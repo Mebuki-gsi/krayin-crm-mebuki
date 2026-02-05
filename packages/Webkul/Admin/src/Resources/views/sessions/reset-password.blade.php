@@ -10,7 +10,7 @@
                 @if ($logo = core()->getConfigData('general.design.admin_logo.logo_image'))
                     <img class="h-10 w-[110px]" src="{{ Storage::url($logo) }}" alt="{{ config('app.name') }}" />
                 @else
-                    <img class="h-10" src="{{ url('images/logo_3lackd.png') }}" alt="{{ config('app.name') }}" />
+                    <img class="h-10" src="{{ url('images/logo_mebuki.png') }}" alt="{{ config('app.name') }}" />
                 @endif
 
                 <div class="box-shadow flex min-w-[300px] flex-col rounded-md bg-white dark:bg-gray-900">

@@ -16,7 +16,7 @@ return [
     |
      */
 
-    'name' => env('APP_NAME', '3lackd Serviços de Tecnologia'),
+    'name' => env('APP_NAME', 'Mebuki'),
 
     /*
     |--------------------------------------------------------------------------

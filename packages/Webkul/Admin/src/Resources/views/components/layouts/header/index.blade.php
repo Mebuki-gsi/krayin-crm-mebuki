@@ -9,7 +9,7 @@
             @if ($logo = core()->getConfigData('general.general.admin_logo.logo_image'))
                 <img class="h-10" src="{{ Storage::url($logo) }}" alt="{{ config('app.name') }}" />
             @else
-                <img class="h-10" src="{{ url('images/logo_3lackd.png') }}" id="logo-image"
+                <img class="h-10" src="{{ url('images/logo_mebuki.png') }}" id="logo-image"
                     alt="{{ config('app.name') }}" />
             @endif
         </a>
@@ -95,14 +95,14 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dark-template">
-            <div class="flex">
-                <span
-                    class="cursor-pointer rounded-md p-1.5 text-2xl transition-all hover:bg-gray-100 dark:hover:bg-gray-950"
-                    :class="[isDarkMode ? 'icon-light' : 'icon-dark']"
-                    @click="toggle"
-                ></span>
-            </div>
-        </script>
+                <div class="flex">
+                    <span
+                        class="cursor-pointer rounded-md p-1.5 text-2xl transition-all hover:bg-gray-100 dark:hover:bg-gray-950"
+                        :class="[isDarkMode ? 'icon-light' : 'icon-dark']"
+                        @click="toggle"
+                    ></span>
+                </div>
+            </script>
 
     <script type="module">
         app.component('v-dark', {
@@ -112,9 +112,9 @@
                 return {
                     isDarkMode: {{ request()->cookie('dark_mode') ?? 0 }},
 
-                    logo: "{{ url('images/logo_3lackd.png') }}",
+                    logo: "{{ url('images/logo_mebuki.png') }}",
 
-                    dark_logo: "{{ url('images/logo_3lackd.png') }}",
+                    dark_logo: "{{ url('images/logo_mebuki.png') }}",
                 };
             },
 

@@ -26,7 +26,7 @@
                 @else
                     <img
                         class="h-10"
-                        src="{{ url('images/logo_3lackd.png') }}"
+                        src="{{ url('images/logo_mebuki.png') }}"
                         id="logo-image"
                         alt="{{ config('app.name') }}"
                     />
