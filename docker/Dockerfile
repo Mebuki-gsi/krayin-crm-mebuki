@@ -27,7 +27,9 @@ RUN apk add --no-cache \
     git \
     curl \
     icu-dev \
-    gettext-dev
+    gettext-dev \
+    libffi-dev \
+    openssl-dev
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
