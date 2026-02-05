@@ -33,6 +33,7 @@ RUN apk add --no-cache \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install \
     pdo_mysql \
+    mbstring \
     exif \
     pcntl \
     bcmath \
@@ -53,7 +54,7 @@ COPY . .
 COPY --from=assets /app/public/build ./public/build
 
 # Install PHP dependencies
-RUN COMPOSER_MEMORY_LIMIT=-1 composer update --no-dev --optimize-autoloader --no-scripts
+RUN COMPOSER_MEMORY_LIMIT=-1 composer update --no-dev --optimize-autoloader --no-scripts --no-interaction --ignore-platform-reqs
 
 # Configuration
 RUN sed -i 's/;clear_env = no/clear_env = no/g' /usr/local/etc/php-fpm.d/www.conf
