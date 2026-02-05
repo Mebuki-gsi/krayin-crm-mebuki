@@ -1,86 +1,125 @@
 <v-upload>
-    <button
-        type="button"
-        class="secondary-button"
-    >
+    <button type="button" class="secondary-button">
         @lang('admin::app.leads.index.upload.upload-file')
     </button>
 </v-upload>
 
 @pushOnce('scripts')
-    <script
-        type="text/x-template"
-        id="upload-template"
-    >
-        <div>
-            <button
-                type="button"
-                class="secondary-button"
-                @click="$refs.userUpdateAndCreateModal.open()"
-            >
-                @lang('admin::app.leads.index.upload.upload-file')
-            </button>
+    <script type="text/x-template" id="upload-template">
+            <div>
+                <div class="flex items-center gap-2">
+                     <button
+                        type="button"
+                        class="secondary-button"
+                        @click="$refs.userUpdateAndCreateModal.open()"
+                    >
+                        @lang('admin::app.leads.index.upload.upload-file')
+                    </button>
 
-            <x-admin::form
-                v-slot="{ meta, values, errors, handleSubmit }"
-                as="div"
-                ref="modalForm"
-            >
-                <form 
-                    @submit="handleSubmit($event, create)"
-                    enctype="multipart/form-data"
-                    ref="userForm"
+                    <button
+                        type="button"
+                        class="flex h-[38px] w-[38px] items-center justify-center rounded-md border border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900"
+                        @click="$refs.aiHelperModal.open()"
+                        title="@lang('admin::app.leads.file.ai-helper.title')"
+                    >
+                        <span class="icon-help text-2xl text-gray-600 dark:text-gray-300"></span>
+                    </button>
+                </div>
+
+                <x-admin::form
+                    v-slot="{ meta, values, errors, handleSubmit }"
+                    as="div"
+                    ref="modalForm"
                 >
-                    <x-admin::modal ref="userUpdateAndCreateModal">
-                        <!-- Modal Header -->
-                        <x-slot:header>
-                            <p class="text-lg font-bold text-gray-800 dark:text-white">
-                                @lang('admin::app.leads.index.upload.create-lead')
-                            </p>
-                        </x-slot>
-
-                        <!-- Modal Content -->
-                        <x-slot:content>
-                            <x-admin::form.control-group>
-                                <x-admin::form.control-group.label class="required">
-                                    @lang('admin::app.leads.index.upload.file')
-                                </x-admin::form.control-group.label>
-
-                                <x-admin::form.control-group.control
-                                    type="file"
-                                    id="files"
-                                    name="files"
-                                    rules="required|mimes:pdf,bmp,jpeg,jpg,png,webp"
-                                    :label="trans('admin::app.leads.index.upload.file')"
-                                    ::disabled="isLoading"
-                                    ref="file"
-                                    accept="application/pdf,image/*"
-                                    multiple
-                                />
-
-                                <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                                    @lang('admin::app.leads.index.upload.file-info')
+                    <form 
+                        @submit="handleSubmit($event, create)"
+                        enctype="multipart/form-data"
+                        ref="userForm"
+                    >
+                        <x-admin::modal ref="userUpdateAndCreateModal">
+                            <!-- Modal Header -->
+                            <x-slot:header>
+                                <p class="text-lg font-bold text-gray-800 dark:text-white">
+                                    @lang('admin::app.leads.index.upload.create-lead')
                                 </p>
+                            </x-slot>
 
-                                <x-admin::form.control-group.error control-name="files" />
-                            </x-admin::form.control-group>
-                        </x-slot>
+                            <!-- Modal Content -->
+                            <x-slot:content>
+                                <x-admin::form.control-group>
+                                    <x-admin::form.control-group.label class="required">
+                                        @lang('admin::app.leads.index.upload.file')
+                                    </x-admin::form.control-group.label>
 
-                        <!-- Modal Footer -->
-                        <x-slot:footer>
-                            <x-admin::button
-                                button-type="submit"
-                                class="primary-button justify-center"
-                                :title="trans('admin::app.leads.index.upload.save-btn')"
-                                ::loading="isLoading"
-                                ::disabled="isLoading"
-                            />
-                        </x-slot>
-                    </x-admin::modal>
-                </form>
-            </x-admin::form>
-        </div>
-    </script>
+                                    <x-admin::form.control-group.control
+                                        type="file"
+                                        id="files"
+                                        name="files"
+                                        rules="required|mimes:pdf,bmp,jpeg,jpg,png,webp"
+                                        :label="trans('admin::app.leads.index.upload.file')"
+                                        ::disabled="isLoading"
+                                        ref="file"
+                                        accept="application/pdf,image/*"
+                                        multiple
+                                    />
+
+                                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                                        @lang('admin::app.leads.index.upload.file-info')
+                                    </p>
+
+                                    <x-admin::form.control-group.error control-name="files" />
+                                </x-admin::form.control-group>
+                            </x-slot>
+
+                            <!-- Modal Footer -->
+                            <x-slot:footer>
+                                <x-admin::button
+                                    button-type="submit"
+                                    class="primary-button justify-center"
+                                    :title="trans('admin::app.leads.index.upload.save-btn')"
+                                    ::loading="isLoading"
+                                    ::disabled="isLoading"
+                                />
+                            </x-slot>
+                        </x-admin::modal>
+                    </form>
+                </x-admin::form>
+
+                 <!-- AI Helper Modal -->
+                 <x-admin::modal ref="aiHelperModal">
+                    <x-slot:header>
+                        <p class="text-lg font-bold text-gray-800 dark:text-white">
+                            @lang('admin::app.leads.file.ai-helper.title')
+                        </p>
+                    </x-slot>
+
+                    <x-slot:content>
+                        <div class="text-gray-600 dark:text-gray-300">
+                            <p class="mb-4">@lang('admin::app.leads.file.ai-helper.description')</p>
+
+                            <ul class="list-disc space-y-2 pl-5">
+                                <li>@lang('admin::app.leads.file.ai-helper.tips.t1')</li>
+                                <li>@lang('admin::app.leads.file.ai-helper.tips.t2')</li>
+                                <li>@lang('admin::app.leads.file.ai-helper.tips.t3')</li>
+                                <li>@lang('admin::app.leads.file.ai-helper.tips.t4')</li>
+                            </ul>
+                        </div>
+                    </x-slot>
+
+                    <x-slot:footer>
+                        <div class="flex justify-end">
+                            <button
+                                type="button"
+                                class="primary-button"
+                                @click="$refs.aiHelperModal.close()"
+                            >
+                                @lang('admin::app.leads.file.ai-helper.btn')
+                            </button>
+                        </div>
+                    </x-slot>
+                </x-admin::modal>
+            </div>
+        </script>
 
     <script type="module">
         app.component('v-upload', {
@@ -121,19 +160,19 @@
                             'Content-Type': 'multipart/form-data',
                         }
                     })
-                    .then(response => {
-                        this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
+                        .then(response => {
+                            this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
 
-                        this.$parent.$refs.leadsKanban.boot()
-                    })
-                    .catch(error => {
-                        this.$emitter.emit('add-flash', { type: 'error', message: error.response.data.message });
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
+                            this.$parent.$refs.leadsKanban.boot()
+                        })
+                        .catch(error => {
+                            this.$emitter.emit('add-flash', { type: 'error', message: error.response.data.message });
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
 
-                        this.$refs.userUpdateAndCreateModal.close();
-                    });
+                            this.$refs.userUpdateAndCreateModal.close();
+                        });
                 },
             },
         });

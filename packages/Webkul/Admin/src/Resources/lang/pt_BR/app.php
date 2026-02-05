@@ -1760,6 +1760,18 @@ return [
             'not-found' => 'Arquivo não encontrado.',
             'recursive-call' => 'Chamada recursiva detectada.',
             'text-generation-failed' => 'Falha na extração de texto. O arquivo pode estar vazio ou ilegível.',
+            'generic-error' => 'Ocorreu um erro ao processar o arquivo. Por favor, tente novamente ou verifique o formato.',
+            'ai-helper' => [
+                'title' => 'Como preparar seu documento para a IA?',
+                'description' => 'Para que a inteligência artificial consiga ler seu documento (PDF ou Imagem) e preencher os dados corretamente, tente manter as informações claras:',
+                'tips' => [
+                    't1' => 'Certifique-se de que o documento tenha um título claro.',
+                    't2' => 'Inclua o nome da pessoa de contato, email e telefone.',
+                    't3' => 'Valores monetários devem estar visíveis.',
+                    't4' => 'Evite documentos muito poluídos visualmente ou com escrita à mão ilegível.',
+                ],
+                'btn' => 'Entendi',
+            ],
         ],
         'index' => [
             'title' => 'Oportunidades',

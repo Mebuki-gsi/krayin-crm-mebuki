@@ -198,7 +198,9 @@ class MagicAIService
 
             return $data;
         } catch (Exception $e) {
-            return ['error' => $e->getMessage()];
+            \Illuminate\Support\Facades\Log::error('MagicAI Error: ' . $e->getMessage());
+
+            return ['error' => trans('admin::app.leads.file.generic-error')];
         }
     }
 
@@ -277,7 +279,9 @@ class MagicAIService
             ];
 
         } catch (Exception $e) {
-            return ['error' => $e->getMessage()];
+            \Illuminate\Support\Facades\Log::error('Gemini AI Error: ' . $e->getMessage());
+
+            return ['error' => trans('admin::app.leads.file.generic-error')];
         }
     }
 
