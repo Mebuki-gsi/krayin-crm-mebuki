@@ -238,15 +238,15 @@ return [
                 'options' => [
                     [
                         'title' => 'Gemini 1.5 Flash',
-                        'value' => 'google/gemini-1.5-flash',
+                        'value' => 'gemini-1.5-flash',
                     ],
                     [
                         'title' => 'Gemini 1.5 Pro',
-                        'value' => 'google/gemini-1.5-pro',
+                        'value' => 'gemini-1.5-pro',
                     ],
                     [
                         'title' => 'Gemini 2.0 Flash',
-                        'value' => 'google/gemini-2.0-flash',
+                        'value' => 'gemini-2.0-flash',
                     ],
                 ],
             ],

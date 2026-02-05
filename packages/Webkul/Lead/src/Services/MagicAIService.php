@@ -16,7 +16,7 @@ class MagicAIService
     /**
      * API endpoint for Google Gemini service.
      */
-    const GOOGLE_GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s';
+    const GOOGLE_GEMINI_URL = 'https://generativelanguage.googleapis.com/v1/models/%s:generateContent?key=%s';
 
     /**
      * Maximum token limit for AI prompt.
@@ -128,10 +128,15 @@ class MagicAIService
 
         // Check if using Google Direct API (Key starts with AIza)
         if (str_starts_with($apiKey, 'AIza')) {
-            // Remove 'google/' prefix if present for Direct API
+            // Remove 'google/' prefix if present for Direct API (Just in case)
             $model = str_replace('google/', '', $model);
 
             return self::askGemini(array_values($prompt), $model, $apiKey);
+        }
+
+        // For OpenRouter, ensure 'google/' prefix is present for Gemini models if missing
+        if (str_starts_with($model, 'gemini') && !str_starts_with($model, 'google/')) {
+            $model = 'google/' . $model;
         }
 
         return self::ask(array_values($prompt), $model, $apiKey);
