@@ -13,6 +13,7 @@ use Webkul\Core\Facades\Menu as MenuFacade;
 use Webkul\Core\Facades\SystemConfig as SystemConfigFacade;
 use Webkul\Core\Menu;
 use Webkul\Core\SystemConfig;
+use Webkul\Core\Services\BigQueryService;
 
 class CoreServiceProvider extends ServiceProvider
 {
@@ -25,16 +26,16 @@ class CoreServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        include __DIR__.'/../Http/helpers.php';
+        include __DIR__ . '/../Http/helpers.php';
 
-        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'core');
+        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'core');
 
         $this->publishes([
-            dirname(__DIR__).'/Config/concord.php' => config_path('concord.php'),
-            dirname(__DIR__).'/Config/cors.php'    => config_path('cors.php'),
-            dirname(__DIR__).'/Config/sanctum.php' => config_path('sanctum.php'),
+            dirname(__DIR__) . '/Config/concord.php' => config_path('concord.php'),
+            dirname(__DIR__) . '/Config/cors.php' => config_path('cors.php'),
+            dirname(__DIR__) . '/Config/sanctum.php' => config_path('sanctum.php'),
         ]);
     }
 
@@ -67,13 +68,17 @@ class CoreServiceProvider extends ServiceProvider
 
         $loader->alias('menu', MenuFacade::class);
 
-        $this->app->singleton('acl', fn () => app(Acl::class));
+        $loader->alias('bigquery', BigQueryService::class);
 
-        $this->app->singleton('core', fn () => app(Core::class));
+        $this->app->singleton('acl', fn() => app(Acl::class));
 
-        $this->app->singleton('system_config', fn () => app()->make(SystemConfig::class));
+        $this->app->singleton('core', fn() => app(Core::class));
 
-        $this->app->singleton('menu', fn () => app()->make(Menu::class));
+        $this->app->singleton('system_config', fn() => app()->make(SystemConfig::class));
+
+        $this->app->singleton('menu', fn() => app()->make(Menu::class));
+
+        $this->app->singleton('bigquery', fn() => app()->make(BigQueryService::class));
     }
 
     /**

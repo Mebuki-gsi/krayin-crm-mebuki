@@ -302,6 +302,29 @@ class Lead extends AbstractReporting
      */
     public function getTotalWonLeadValueBySources()
     {
+        $bigQueryService = app('bigquery');
+
+        if ($bigQueryService->isEnabled()) {
+            $user = auth()->user();
+
+            $stats = $bigQueryService->getRevenueStats(
+                $user->email,
+                $this->startDate->format('Y-m-d'),
+                $this->endDate->format('Y-m-d')
+            );
+
+            return collect([
+                (object) [
+                    'name' => trans('admin::app.dashboard.index.revenue-by-sources.title'),
+                    'total' => $stats['total_faturamento'] ?? 0,
+                    'formatted_total' => core()->formatBasePrice($stats['total_faturamento'] ?? 0),
+                    'meta' => $stats['total_meta'] ?? 0,
+                    'formatted_meta' => core()->formatBasePrice($stats['total_meta'] ?? 0),
+                    'percentage' => $stats['total_meta'] > 0 ? ($stats['total_faturamento'] / $stats['total_meta']) * 100 : 0,
+                ]
+            ]);
+        }
+
         $query = $this->leadRepository
             ->resetModel()
             ->select(

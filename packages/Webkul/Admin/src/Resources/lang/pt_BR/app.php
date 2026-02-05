@@ -2038,6 +2038,22 @@ return [
                     ],
                 ],
             ],
+
+            'bigquery' => [
+                'title' => 'BigQuery',
+                'info' => 'Configurações de integração com o Google BigQuery para Faturamento e Metas.',
+
+                'settings' => [
+                    'title' => 'Configurações de Conexão',
+                    'info' => 'Informe as credenciais da sua conta de serviço do Google Cloud.',
+                    'enable' => 'Ativar Integração',
+                    'project-id' => 'Project ID',
+                    'dataset-id' => 'Dataset ID',
+                    'table-id' => 'Table ID',
+                    'service-account' => 'Service Account JSON',
+                    'service-account-info' => 'Cole o conteúdo completo do seu arquivo JSON da conta de serviço.',
+                ],
+            ],
         ],
     ],
     'dashboard' => [
@@ -2064,7 +2080,7 @@ return [
                 'lost' => 'Negócios perdidos',
             ],
             'revenue-by-sources' => [
-                'title' => 'Faturamento por origens',
+                'title' => 'Meta de Faturamento',
                 'empty-title' => 'Ainda não há dados',
                 'empty-info' => 'Nenhum dado disponível para o intervalo selecionado',
             ],
