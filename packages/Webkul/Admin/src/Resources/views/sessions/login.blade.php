@@ -12,7 +12,7 @@
                 style="flex: 0 0 60%; position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 3rem; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('{{ asset('images/crm_login_background.png') }}'); background-size: cover; background-position: center;">
 
                 <div style="position: relative; z-index: 10;">
-                    @if ($logo = core()->getConfigData('general.design.admin_logo.logo_image'))
+                    @if ($logo = core()->getConfigData('general.general.admin_logo.logo_image'))
                         <img style="height: 3rem; width: auto;" src="{{ Storage::url($logo) }}"
                             alt="{{ config('app.name') }}" />
                     @else
