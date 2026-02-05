@@ -16,7 +16,7 @@ class MagicAIService
     /**
      * API endpoint for Google Gemini service.
      */
-    const GOOGLE_GEMINI_URL = 'https://generativelanguage.googleapis.com/v1/models/%s:generateContent?key=%s';
+    const GOOGLE_GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s';
 
     /**
      * Maximum token limit for AI prompt.
