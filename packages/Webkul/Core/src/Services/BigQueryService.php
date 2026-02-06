@@ -393,4 +393,110 @@ class BigQueryService
             return $this->runQuery($query);
         });
     }
+
+    /**
+     * Get top selling products.
+     */
+    public function getTopSellingProducts(array $emails, $startDate, $endDate, $limit = 5): array
+    {
+        if (!$this->isEnabled())
+            return [];
+
+        $cacheKey = "bq_top_products_" . md5(json_encode($emails) . $startDate . $endDate . $limit);
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($emails, $startDate, $endDate, $limit) {
+            $dataset = $this->config['revenue_dataset'];
+            $table = $this->config['revenue_table'];
+            $vendorCodes = $this->getVendorCodesByEmails($emails, $dataset, $table);
+
+            if (empty($vendorCodes))
+                return [];
+
+            $query = "
+                SELECT 
+                    PRODUTO_METAS as name,
+                    ANY_VALUE(COD_ITEM_METAS) as code,
+                    SUM(COALESCE(faturamento_semst, 0)) as revenue,
+                    SUM(COALESCE(QTDE_faturamento, 0)) as quantity
+                FROM `{$this->config['project_id']}.{$dataset}.{$table}`
+                WHERE CODIGO_VENDEDOR IN UNNEST(@codes)
+                  AND DATE(EMISSAO_faturamento) BETWEEN @start AND @end
+                GROUP BY name
+                HAVING revenue > 0
+                ORDER BY revenue DESC
+                LIMIT @limit
+            ";
+
+            $jobConfig = $this->client->query($query)
+                ->parameters([
+                    'codes' => $vendorCodes,
+                    'start' => $startDate,
+                    'end' => $endDate,
+                    'limit' => (int) $limit,
+                ]);
+
+            $results = $this->client->runQuery($jobConfig);
+            $items = [];
+            foreach ($results as $row) {
+                $items[] = [
+                    'name' => $row['name'],
+                    'code' => $row['code'],
+                    'revenue' => (float) $row['revenue'],
+                    'quantity' => (float) $row['quantity'],
+                ];
+            }
+            return $items;
+        });
+    }
+
+    /**
+     * Get top customers by revenue.
+     */
+    public function getTopCustomers(array $emails, $startDate, $endDate, $limit = 5): array
+    {
+        if (!$this->isEnabled())
+            return [];
+
+        $cacheKey = "bq_top_customers_" . md5(json_encode($emails) . $startDate . $endDate . $limit);
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($emails, $startDate, $endDate, $limit) {
+            $dataset = $this->config['revenue_dataset'];
+            $table = $this->config['revenue_table'];
+            $vendorCodes = $this->getVendorCodesByEmails($emails, $dataset, $table);
+
+            if (empty($vendorCodes))
+                return [];
+
+            $query = "
+                SELECT 
+                    RAZAO as name,
+                    ANY_VALUE(COD_ORIGEM) as code,
+                    SUM(COALESCE(faturamento_semst, 0)) as revenue
+                FROM `{$this->config['project_id']}.{$dataset}.{$table}`
+                WHERE CODIGO_VENDEDOR IN UNNEST(@codes)
+                  AND DATE(EMISSAO_faturamento) BETWEEN @start AND @end
+                GROUP BY name
+                HAVING revenue > 0
+                ORDER BY revenue DESC
+                LIMIT @limit
+            ";
+
+            $jobConfig = $this->client->query($query)
+                ->parameters([
+                    'codes' => $vendorCodes,
+                    'start' => $startDate,
+                    'end' => $endDate,
+                    'limit' => (int) $limit,
+                ]);
+
+            $results = $this->client->runQuery($jobConfig);
+            $items = [];
+            foreach ($results as $row) {
+                $items[] = [
+                    'name' => $row['name'],
+                    'code' => $row['code'],
+                    'revenue' => (float) $row['revenue'],
+                ];
+            }
+            return $items;
+        });
+    }
 }

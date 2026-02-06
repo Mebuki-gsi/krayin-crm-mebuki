@@ -3,6 +3,8 @@
 namespace Webkul\Admin\Http\Controllers;
 
 use Webkul\Admin\Helpers\Dashboard;
+use Webkul\User\Repositories\UserRepository;
+use Webkul\Lead\Repositories\LeadRepository;
 
 class DashboardController extends Controller
 {
@@ -27,8 +29,11 @@ class DashboardController extends Controller
      *
      * @return void
      */
-    public function __construct(protected Dashboard $dashboardHelper)
-    {
+    public function __construct(
+        protected Dashboard $dashboardHelper,
+        protected UserRepository $userRepository,
+        protected LeadRepository $leadRepository
+    ) {
     }
 
     /**
@@ -80,6 +85,8 @@ class DashboardController extends Controller
                 $defaultUserId = $user->id;
             }
         }
+
+        $totalWonLeads = app(\Webkul\Admin\Helpers\Reporting\Lead::class)->getTotalWonLeads($startDate, $endDate);
 
         return view('admin::dashboard.index')->with([
             'startDate' => $startDate,

@@ -26,6 +26,30 @@ class Product extends AbstractReporting
      */
     public function getTopSellingProductsByRevenue($limit = null): Collection
     {
+        $bigQueryService = app('bigquery');
+
+        if ($bigQueryService->isEnabled()) {
+            $emails = $this->getFilteredUserEmails();
+
+            $items = $bigQueryService->getTopSellingProducts(
+                $emails,
+                $this->startDate->format('Y-m-d'),
+                $this->endDate->format('Y-m-d'),
+                $limit
+            );
+
+            return collect($items)->map(function ($item) {
+                return [
+                    'id' => $item['code'],
+                    'name' => $item['name'],
+                    'price' => 0,
+                    'formatted_price' => core()->formatBasePrice(0),
+                    'revenue' => $item['revenue'],
+                    'formatted_revenue' => core()->formatBasePrice($item['revenue']),
+                ];
+            });
+        }
+
         $tablePrefix = DB::getTablePrefix();
 
         $items = $this->productRepository

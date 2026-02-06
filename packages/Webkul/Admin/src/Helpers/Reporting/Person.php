@@ -54,6 +54,30 @@ class Person extends AbstractReporting
      */
     public function getTopCustomersByRevenue($limit = null): Collection
     {
+        $bigQueryService = app('bigquery');
+
+        if ($bigQueryService->isEnabled()) {
+            $emails = $this->getFilteredUserEmails();
+
+            $items = $bigQueryService->getTopCustomers(
+                $emails,
+                $this->startDate->format('Y-m-d'),
+                $this->endDate->format('Y-m-d'),
+                $limit
+            );
+
+            return collect($items)->map(function ($item) {
+                return [
+                    'id' => $item['code'],
+                    'name' => $item['name'],
+                    'emails' => [],
+                    'contact_numbers' => [],
+                    'revenue' => $item['revenue'],
+                    'formatted_revenue' => core()->formatBasePrice($item['revenue']),
+                ];
+            });
+        }
+
         $tablePrefix = DB::getTablePrefix();
 
         $items = $this->personRepository
