@@ -189,6 +189,8 @@ abstract class AbstractReporting
             $user = auth()->user();
             $bigQueryService = app('bigquery');
 
+            $isSalesperson = false;
+
             if ($user && $bigQueryService->isEnabled()) {
                 $role = $bigQueryService->determineUserRole($user->email);
                 $isSalesperson = $role == 'vendedor';
