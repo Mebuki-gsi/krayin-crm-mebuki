@@ -41,19 +41,21 @@ class DashboardController extends Controller
         $user = auth()->user();
         $bigQueryService = app('bigquery');
 
+        $defaultUserId = null;
         if ($bigQueryService->isEnabled()) {
             $role = $bigQueryService->determineUserRole($user->email);
 
             if ($role == 'gerente') {
                 $subordinateEmails = $bigQueryService->getSubordinates($user->email);
 
-                // Also include self in the list
+                // Ensure manager is in the list
                 $subordinateEmails[] = $user->email;
 
                 $users = app(\Webkul\User\Repositories\UserRepository::class)
                     ->findWhereIn('email', array_unique($subordinateEmails));
             } elseif ($role == 'vendedor') {
-                $users = []; // Salespeople only see themselves, no filter list needed
+                $users = [];
+                $defaultUserId = $user->id;
             } else {
                 // Admin - sees everyone
                 $users = app(\Webkul\User\Repositories\UserRepository::class)->all();
@@ -64,12 +66,17 @@ class DashboardController extends Controller
                 'group' => app(\Webkul\User\Repositories\UserRepository::class)->findWhereIn('id', app(\Webkul\User\Repositories\UserRepository::class)->getCurrentUserGroupsUserIds()),
                 default => [],
             };
+
+            if ($user->view_permission == 'individual') {
+                $defaultUserId = $user->id;
+            }
         }
 
         return view('admin::dashboard.index')->with([
             'startDate' => $this->dashboardHelper->getStartDate(),
             'endDate' => $this->dashboardHelper->getEndDate(),
             'users' => $users,
+            'defaultUserId' => $defaultUserId,
         ]);
     }
 

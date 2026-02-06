@@ -29,13 +29,13 @@ class BigQueryService
     public function __construct()
     {
         $this->config = [
-            'enable' => core()->getConfigData('general.bigquery.settings.enable'),
-            'project_id' => core()->getConfigData('general.bigquery.settings.project_id'),
-            'service_account' => core()->getConfigData('general.bigquery.settings.service_account'),
-            'revenue_dataset' => core()->getConfigData('general.bigquery.settings.revenue_dataset'),
-            'revenue_table' => core()->getConfigData('general.bigquery.settings.revenue_table'),
-            'positivation_dataset' => core()->getConfigData('general.bigquery.settings.positivation_dataset'),
-            'positivation_table' => core()->getConfigData('general.bigquery.settings.positivation_table'),
+            'enable' => core()->getConfigData('general.bigquery.settings.enable') ?? env('BIGQUERY_ENABLE', false),
+            'project_id' => core()->getConfigData('general.bigquery.settings.project_id') ?? env('BIGQUERY_PROJECT_ID'),
+            'service_account' => core()->getConfigData('general.bigquery.settings.service_account') ?? env('BIGQUERY_SERVICE_ACCOUNT'),
+            'revenue_dataset' => core()->getConfigData('general.bigquery.settings.revenue_dataset') ?? env('BIGQUERY_REVENUE_DATASET'),
+            'revenue_table' => core()->getConfigData('general.bigquery.settings.revenue_table') ?? env('BIGQUERY_REVENUE_TABLE'),
+            'positivation_dataset' => core()->getConfigData('general.bigquery.settings.positivation_dataset') ?? env('BIGQUERY_POSITIVATION_DATASET'),
+            'positivation_table' => core()->getConfigData('general.bigquery.settings.positivation_table') ?? env('BIGQUERY_POSITIVATION_TABLE'),
         ];
     }
 

@@ -89,70 +89,70 @@
             </script>
 
             <script type="text/x-template" id="v-dashboard-filters-template">
-                        {!! view_render_event('admin.dashboard.index.date_filters.before') !!}
+                            {!! view_render_event('admin.dashboard.index.date_filters.before') !!}
 
-                        <div class="flex gap-1.5 relative" ref="userDropdown">
-                            @if (!empty($users) && $users->isNotEmpty())
-                                <!-- Custom Dropdown Trigger -->
-                                <button
-                                    type="button"
-                                    class="flex min-h-[39px] w-[140px] items-center justify-between rounded-md border px-3 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
-                                    @click="toggleUserDropdown"
-                                >
-                                    <span class="truncate">@{{ selectedUsersLabel }}</span>
-                                    <span class="icon-arrow-down text-2xl"></span>
-                                </button>
+                            <div class="flex gap-1.5 relative" ref="userDropdown">
+                                @if (!empty($users) && $users->isNotEmpty())
+                                    <!-- Custom Dropdown Trigger -->
+                                    <button
+                                        type="button"
+                                        class="flex min-h-[39px] w-[140px] items-center justify-between rounded-md border px-3 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
+                                        @click="toggleUserDropdown"
+                                    >
+                                        <span class="truncate">@{{ selectedUsersLabel }}</span>
+                                        <span class="icon-arrow-down text-2xl"></span>
+                                    </button>
 
-                                <!-- Dropdown Content -->
-                                <div
-                                    v-if="showUserDropdown"
-                                    class="absolute top-full z-10 mt-1 w-[200px] rounded-md border bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900"
-                                >
-                                        <div class="max-h-[300px] overflow-y-auto p-2">
-                                        <div class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-950 rounded cursor-pointer" @click="filters.user_id = []">
-                                            <div class="h-4 w-4 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center p-0.5" :class="{'bg-brandColor border-brandColor': filters.user_id.length === 0}">
-                                                <span v-if="filters.user_id.length === 0" class="icon-check text-white text-[10px] font-bold"></span>
+                                    <!-- Dropdown Content -->
+                                    <div
+                                        v-if="showUserDropdown"
+                                        class="absolute top-full z-10 mt-1 w-[200px] rounded-md border bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900"
+                                    >
+                                            <div class="max-h-[300px] overflow-y-auto p-2">
+                                            <div class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-950 rounded cursor-pointer" @click="filters.user_id = []">
+                                                <div class="h-4 w-4 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center p-0.5" :class="{'bg-brandColor border-brandColor': filters.user_id.length === 0}">
+                                                    <span v-if="filters.user_id.length === 0" class="icon-check text-white text-[10px] font-bold"></span>
+                                                </div>
+                                                <span class="text-sm text-gray-600 dark:text-gray-300">@lang('All Users')</span>
                                             </div>
-                                            <span class="text-sm text-gray-600 dark:text-gray-300">@lang('All Users')</span>
-                                        </div>
 
-                                        <div class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-950 rounded cursor-pointer" v-for="user in users" :key="user.id" @click="toggleUser(user.id)">
-                                            <div class="h-4 w-4 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center p-0.5" :class="{'bg-brandColor border-brandColor': filters.user_id.includes(user.id)}">
-                                                <span v-if="filters.user_id.includes(user.id)" class="icon-check text-white text-[10px] font-bold"></span>
+                                            <div class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-950 rounded cursor-pointer" v-for="user in users" :key="user.id" @click="toggleUser(user.id)">
+                                                <div class="h-4 w-4 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center p-0.5" :class="{'bg-brandColor border-brandColor': filters.user_id.includes(user.id)}">
+                                                    <span v-if="filters.user_id.includes(user.id)" class="icon-check text-white text-[10px] font-bold"></span>
+                                                </div>
+                                                <span class="text-sm text-gray-600 dark:text-gray-300">@{{ user.name }}</span>
                                             </div>
-                                            <span class="text-sm text-gray-600 dark:text-gray-300">@{{ user.name }}</span>
                                         </div>
                                     </div>
-                                </div>
-                            @endif
+                                @endif
 
-                            <x-admin::flat-picker.date
-                                class="!w-[140px]"
-                                ::allow-input="false"
-                                ::max-date="filters.end"
-                            >
-                                <input
-                                    class="flex min-h-[39px] w-full rounded-md border px-3 py-2 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
-                                    v-model="filters.start"
-                                    placeholder="@lang('admin::app.dashboard.index.start-date')"
-                                />
-                            </x-admin::flat-picker.date>
+                                <x-admin::flat-picker.date
+                                    class="!w-[140px]"
+                                    ::allow-input="false"
+                                    ::max-date="filters.end"
+                                >
+                                    <input
+                                        class="flex min-h-[39px] w-full rounded-md border px-3 py-2 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
+                                        v-model="filters.start"
+                                        placeholder="@lang('admin::app.dashboard.index.start-date')"
+                                    />
+                                </x-admin::flat-picker.date>
 
-                            <x-admin::flat-picker.date
-                                class="!w-[140px]"
-                                ::allow-input="false"
-                                ::max-date="filters.end"
-                            >
-                                <input
-                                    class="flex min-h-[39px] w-full rounded-md border px-3 py-2 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
-                                    v-model="filters.end"
-                                    placeholder="@lang('admin::app.dashboard.index.end-date')"
-                                />
-                            </x-admin::flat-picker.date>
-                        </div>
+                                <x-admin::flat-picker.date
+                                    class="!w-[140px]"
+                                    ::allow-input="false"
+                                    ::max-date="filters.end"
+                                >
+                                    <input
+                                        class="flex min-h-[39px] w-full rounded-md border px-3 py-2 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
+                                        v-model="filters.end"
+                                        placeholder="@lang('admin::app.dashboard.index.end-date')"
+                                    />
+                                </x-admin::flat-picker.date>
+                            </div>
 
-                        {!! view_render_event('admin.dashboard.index.date_filters.after') !!}
-                    </script>
+                            {!! view_render_event('admin.dashboard.index.date_filters.after') !!}
+                        </script>
 
             <script type="module">
                 @if (!empty($users) && $users->isNotEmpty())
@@ -165,7 +165,7 @@
                     data() {
                         return {
                             filters: {
-                                user_id: [],
+                                user_id: @json($defaultUserId ? [$defaultUserId] : []),
                                 start: "{{ $startDate->format('Y-m-d') }}",
                                 end: "{{ $endDate->format('Y-m-d') }}",
                             },
@@ -227,11 +227,12 @@
 
                     watch: {
                         filters: {
-                            handler() {
-                                this.$emitter.emit('reporting-filter-updated', this.filters);
+                            handler(newValue) {
+                                this.$emitter.emit('reporting-filter-updated', newValue);
                             },
 
-                            deep: true
+                            deep: true,
+                            immediate: true
                         }
                     },
                 });
