@@ -266,6 +266,24 @@ class Lead extends AbstractReporting
     }
 
     /**
+     * Retrieves total won leads by date
+     *
+     * @param  \Carbon\Carbon  $startDate
+     * @param  \Carbon\Carbon  $endDate
+     */
+    public function getTotalWonLeads($startDate, $endDate): int
+    {
+        $query = $this->leadRepository
+            ->resetModel()
+            ->whereIn('lead_pipeline_stage_id', $this->wonStageIds)
+            ->whereBetween('closed_at', [$startDate, $endDate]);
+
+        $this->applyPermissionScope($query);
+
+        return $query->count();
+    }
+
+    /**
      * Retrieves average lost lead value and their progress.
      */
     public function getTotalLostLeadValueProgress(): array
