@@ -166,7 +166,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                @endif
+                                </div>
 
                                 <x-admin::flat-picker.date
                                     class="!w-[140px]"
