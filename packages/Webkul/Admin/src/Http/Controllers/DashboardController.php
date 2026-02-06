@@ -39,12 +39,32 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $bigQueryService = app('bigquery');
 
-        $users = match ($user->view_permission) {
-            'global', 'all' => app(\Webkul\User\Repositories\UserRepository::class)->all(),
-            'group' => app(\Webkul\User\Repositories\UserRepository::class)->findWhereIn('id', app(\Webkul\User\Repositories\UserRepository::class)->getCurrentUserGroupsUserIds()),
-            default => [],
-        };
+        if ($bigQueryService->isEnabled()) {
+            $role = $bigQueryService->determineUserRole($user->email);
+
+            if ($role == 'gerente') {
+                $subordinateEmails = $bigQueryService->getSubordinates($user->email);
+
+                // Also include self in the list
+                $subordinateEmails[] = $user->email;
+
+                $users = app(\Webkul\User\Repositories\UserRepository::class)
+                    ->findWhereIn('email', array_unique($subordinateEmails));
+            } elseif ($role == 'vendedor') {
+                $users = []; // Salespeople only see themselves, no filter list needed
+            } else {
+                // Admin - sees everyone
+                $users = app(\Webkul\User\Repositories\UserRepository::class)->all();
+            }
+        } else {
+            $users = match ($user->view_permission) {
+                'global', 'all' => app(\Webkul\User\Repositories\UserRepository::class)->all(),
+                'group' => app(\Webkul\User\Repositories\UserRepository::class)->findWhereIn('id', app(\Webkul\User\Repositories\UserRepository::class)->getCurrentUserGroupsUserIds()),
+                default => [],
+            };
+        }
 
         return view('admin::dashboard.index')->with([
             'startDate' => $this->dashboardHelper->getStartDate(),

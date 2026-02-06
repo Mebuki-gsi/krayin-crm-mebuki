@@ -93,6 +93,58 @@ abstract class AbstractReporting
             return [];
         }
 
+        $bigQueryService = app('bigquery');
+
+        if ($bigQueryService->isEnabled()) {
+            $currentUserRole = $bigQueryService->determineUserRole($user->email);
+
+            if ($currentUserRole == 'vendedor') {
+                return [$user->email];
+            }
+
+            $selectedEmails = [];
+            if ($requestedUserId = request('user_id')) {
+                $ids = is_array($requestedUserId) ? $requestedUserId : [$requestedUserId];
+
+                $selectedEmails = app(\Webkul\User\Repositories\UserRepository::class)
+                    ->findWhereIn('id', $ids)
+                    ->pluck('email')
+                    ->toArray();
+            } else {
+                if ($currentUserRole == 'gerente') {
+                    $selectedEmails = [$user->email];
+                } else {
+                    // Admin - all users
+                    return app(\Webkul\User\Repositories\UserRepository::class)
+                        ->all()
+                        ->pluck('email')
+                        ->toArray();
+                }
+            }
+
+            $finalEmails = [];
+            foreach ($selectedEmails as $email) {
+                // Security check for Gerente: can only select self or subordinates
+                if ($currentUserRole == 'gerente') {
+                    $subordinates = $bigQueryService->getSubordinates($user->email);
+                    if ($email != $user->email && !in_array($email, $subordinates)) {
+                        continue;
+                    }
+                }
+
+                $finalEmails[] = $email;
+
+                // Smart Expansion: if the selected person is a manager, include their team
+                $roleOfSelected = $bigQueryService->determineUserRole($email);
+                if ($roleOfSelected == 'gerente') {
+                    $subs = $bigQueryService->getSubordinates($email);
+                    $finalEmails = array_merge($finalEmails, $subs);
+                }
+            }
+
+            return array_values(array_unique($finalEmails));
+        }
+
         if ($user->view_permission == 'individual') {
             return [$user->email];
         }
@@ -134,9 +186,17 @@ abstract class AbstractReporting
             $this->startDate = $startDate->startOfDay();
         } else {
             $user = auth()->user();
+            $bigQueryService = app('bigquery');
 
-            // Default to 'This Month' for salespeople (individual permission)
-            if ($user && $user->view_permission == 'individual') {
+            $isSalesperson = false;
+            if ($user && $bigQueryService->isEnabled()) {
+                $isSalesperson = $bigQueryService->determineUserRole($user->email) == 'vendedor';
+            } elseif ($user) {
+                $isSalesperson = $user->view_permission == 'individual';
+            }
+
+            // Default to 'This Month' for salespeople
+            if ($isSalesperson) {
                 $this->startDate = now()->startOfMonth()->startOfDay();
             } else {
                 $this->startDate = now()->subDays(30)->startOfDay();
