@@ -81,6 +81,48 @@ abstract class AbstractReporting
     }
 
     /**
+     * Get filtered user emails.
+     *
+     * @return array
+     */
+    public function getFilteredUserEmails()
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return [];
+        }
+
+        if ($user->view_permission == 'individual') {
+            return [$user->email];
+        }
+
+        if ($requestedUserId = request('user_id')) {
+            $ids = is_array($requestedUserId) ? $requestedUserId : [$requestedUserId];
+
+            return app(\Webkul\User\Repositories\UserRepository::class)
+                ->findWhereIn('id', $ids)
+                ->pluck('email')
+                ->toArray();
+        }
+
+        if ($user->view_permission == 'group') {
+            $userIds = app(\Webkul\User\Repositories\UserRepository::class)->getCurrentUserGroupsUserIds();
+
+            return app(\Webkul\User\Repositories\UserRepository::class)
+                ->findWhereIn('id', $userIds)
+                ->pluck('email')
+                ->toArray();
+        }
+
+        // Global/All
+        return app(\Webkul\User\Repositories\UserRepository::class)
+            ->all()
+            ->pluck('email')
+            ->toArray();
+    }
+
+    /**
      * Set the start date or default to 30 days ago if not provided.
      *
      * @param  \Carbon\Carbon|null  $startDate
@@ -88,7 +130,18 @@ abstract class AbstractReporting
      */
     public function setStartDate(?Carbon $startDate = null): self
     {
-        $this->startDate = $startDate ? $startDate->startOfDay() : now()->subDays(30)->startOfDay();
+        if ($startDate) {
+            $this->startDate = $startDate->startOfDay();
+        } else {
+            $user = auth()->user();
+
+            // Default to 'This Month' for salespeople (individual permission)
+            if ($user && $user->view_permission == 'individual') {
+                $this->startDate = now()->startOfMonth()->startOfDay();
+            } else {
+                $this->startDate = now()->subDays(30)->startOfDay();
+            }
+        }
 
         $this->setLastStartDate();
 

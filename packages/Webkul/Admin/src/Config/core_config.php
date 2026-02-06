@@ -274,61 +274,7 @@ return [
     [
         'key' => 'general.bigquery.settings',
         'name' => 'admin::app.configuration.index.bigquery.settings.title',
-        'info' => 'admin::app.configuration.index.bigquery.settings.info',
-        'sort' => 1,
-        'fields' => [
-            [
-                'name' => 'enable',
-                'title' => 'admin::app.configuration.index.bigquery.settings.enable',
-                'type' => 'boolean',
-                'channel_based' => true,
-            ],
-            [
-                'name' => 'project_id',
-                'title' => 'admin::app.configuration.index.bigquery.settings.project-id',
-                'type' => 'text',
-                'depends' => 'enable:1',
-                'validation' => 'required_if:enable,1',
-            ],
-            [
-                'name' => 'dataset_id',
-                'title' => 'admin::app.configuration.index.bigquery.settings.dataset-id',
-                'type' => 'text',
-                'depends' => 'enable:1',
-                'validation' => 'required_if:enable,1',
-            ],
-            [
-                'name' => 'table_id',
-                'title' => 'admin::app.configuration.index.bigquery.settings.table-id',
-                'type' => 'text',
-                'depends' => 'enable:1',
-                'validation' => 'required_if:enable,1',
-            ],
-            [
-                'name' => 'service_account',
-                'title' => 'admin::app.configuration.index.bigquery.settings.service-account',
-                'type' => 'textarea',
-                'depends' => 'enable:1',
-                'validation' => 'required_if:enable,1',
-                'info' => 'admin::app.configuration.index.bigquery.settings.service-account-info',
-            ],
-        ],
-    ],
-
-    /**
-     * BigQuery.
-     */
-    [
-        'key' => 'general.bigquery',
-        'name' => 'admin::app.configuration.index.bigquery.title',
         'info' => 'admin::app.configuration.index.bigquery.info',
-        'icon' => 'icon-configuration',
-        'sort' => 4,
-    ],
-    [
-        'key' => 'general.bigquery.settings',
-        'name' => 'admin::app.configuration.index.bigquery.settings.title',
-        'info' => 'admin::app.configuration.index.bigquery.settings.info',
         'sort' => 1,
         'fields' => [
             [
@@ -345,26 +291,44 @@ return [
                 'validation' => 'required_if:enable,1',
             ],
             [
-                'name' => 'dataset_id',
-                'title' => 'admin::app.configuration.index.bigquery.settings.dataset-id',
-                'type' => 'text',
-                'depends' => 'enable:1',
-                'validation' => 'required_if:enable,1',
-            ],
-            [
-                'name' => 'table_id',
-                'title' => 'admin::app.configuration.index.bigquery.settings.table-id',
-                'type' => 'text',
-                'depends' => 'enable:1',
-                'validation' => 'required_if:enable,1',
-            ],
-            [
                 'name' => 'service_account',
                 'title' => 'admin::app.configuration.index.bigquery.settings.service-account',
                 'type' => 'textarea',
                 'depends' => 'enable:1',
                 'validation' => 'required_if:enable,1',
                 'info' => 'admin::app.configuration.index.bigquery.settings.service-account-info',
+            ],
+            // Revenue Settings
+            [
+                'name' => 'revenue_dataset',
+                'title' => 'admin::app.configuration.index.bigquery.settings.revenue.dataset-id',
+                'type' => 'text',
+                'depends' => 'enable:1',
+                'validation' => 'required_if:enable,1',
+            ],
+            [
+                'name' => 'revenue_table',
+                'title' => 'admin::app.configuration.index.bigquery.settings.revenue.table-id',
+                'type' => 'text',
+                'depends' => 'enable:1',
+                'validation' => 'required_if:enable,1',
+                'info' => 'admin::app.configuration.index.bigquery.settings.revenue.table-info',
+            ],
+            // Positivation Settings
+            [
+                'name' => 'positivation_dataset',
+                'title' => 'admin::app.configuration.index.bigquery.settings.positivation.dataset-id',
+                'type' => 'text',
+                'depends' => 'enable:1',
+                'validation' => 'required_if:enable,1',
+            ],
+            [
+                'name' => 'positivation_table',
+                'title' => 'admin::app.configuration.index.bigquery.settings.positivation.table-id',
+                'type' => 'text',
+                'depends' => 'enable:1',
+                'validation' => 'required_if:enable,1',
+                'info' => 'admin::app.configuration.index.bigquery.settings.positivation.table-info',
             ],
         ],
     ],

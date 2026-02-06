@@ -305,10 +305,10 @@ class Lead extends AbstractReporting
         $bigQueryService = app('bigquery');
 
         if ($bigQueryService->isEnabled()) {
-            $user = auth()->user();
+            $emails = $this->getFilteredUserEmails();
 
             $stats = $bigQueryService->getRevenueStats(
-                $user->email,
+                $emails,
                 $this->startDate->format('Y-m-d'),
                 $this->endDate->format('Y-m-d')
             );
@@ -320,7 +320,7 @@ class Lead extends AbstractReporting
                     'formatted_total' => core()->formatBasePrice($stats['total_faturamento'] ?? 0),
                     'meta' => $stats['total_meta'] ?? 0,
                     'formatted_meta' => core()->formatBasePrice($stats['total_meta'] ?? 0),
-                    'percentage' => $stats['total_meta'] > 0 ? ($stats['total_faturamento'] / $stats['total_meta']) * 100 : 0,
+                    'percentage' => ($stats['total_meta'] ?? 0) > 0 ? ($stats['total_faturamento'] / $stats['total_meta']) * 100 : 0,
                 ]
             ]);
         }
@@ -342,10 +342,33 @@ class Lead extends AbstractReporting
     }
 
     /**
-     * Retrieves total lead value by types.
+     * Retrieves total lead value by types (Used for Positivation when BigQuery is active).
      */
     public function getTotalWonLeadValueByTypes()
     {
+        $bigQueryService = app('bigquery');
+
+        if ($bigQueryService->isEnabled()) {
+            $emails = $this->getFilteredUserEmails();
+
+            $stats = $bigQueryService->getPositivationStats(
+                $emails,
+                $this->startDate->format('Y-m-d'),
+                $this->endDate->format('Y-m-d')
+            );
+
+            return collect([
+                (object) [
+                    'name' => trans('admin::app.dashboard.index.revenue-by-types.title'),
+                    'total' => $stats['total_positivacao'] ?? 0,
+                    'formatted_total' => $stats['total_positivacao'] ?? 0, // No currency formatting for count
+                    'meta' => $stats['total_meta'] ?? 0,
+                    'formatted_meta' => $stats['total_meta'] ?? 0,
+                    'percentage' => ($stats['total_meta'] ?? 0) > 0 ? ($stats['total_positivacao'] / $stats['total_meta']) * 100 : 0,
+                ]
+            ]);
+        }
+
         $query = $this->leadRepository
             ->resetModel()
             ->select(

@@ -2044,14 +2044,28 @@ return [
                 'info' => 'Configurações de integração com o Google BigQuery para Faturamento e Metas.',
 
                 'settings' => [
-                    'title' => 'Configurações de Conexão',
-                    'info' => 'Informe as credenciais da sua conta de serviço do Google Cloud.',
+                    'title' => 'Configurações Gerais',
+                    'info' => 'Configurações globais e credenciais do Google Cloud.',
                     'enable' => 'Ativar Integração',
-                    'project-id' => 'Project ID',
-                    'dataset-id' => 'Dataset ID',
-                    'table-id' => 'Table ID',
+                    'project-id' => 'Google Cloud Project ID',
                     'service-account' => 'Service Account JSON',
-                    'service-account-info' => 'Cole o conteúdo completo do seu arquivo JSON da conta de serviço.',
+                    'service-account-info' => 'Cole o conteúdo do arquivo JSON da conta de serviço.',
+
+                    'revenue' => [
+                        'title' => 'Meta de Faturamento',
+                        'info' => 'Configurações para o card de faturamento.',
+                        'dataset-id' => 'Dataset ID',
+                        'table-id' => 'Table ID',
+                        'table-info' => 'Colunas esperadas: faturamento_semst, Meta_vendedor, EMISSAO_faturamento, CODIGO_VENDEDOR, EMAIL_REP.',
+                    ],
+
+                    'positivation' => [
+                        'title' => 'Meta de Positivação',
+                        'info' => 'Configurações para o card de positivação.',
+                        'dataset-id' => 'Dataset ID',
+                        'table-id' => 'Table ID',
+                        'table-info' => 'Colunas esperadas: CODIGO_CLIENTE, Meta_positivacao, EMISSAO_faturamento, CODIGO_VENDEDOR, EMAIL_REP.',
+                    ],
                 ],
             ],
         ],
@@ -2085,7 +2099,7 @@ return [
                 'empty-info' => 'Nenhum dado disponível para o intervalo selecionado',
             ],
             'revenue-by-types' => [
-                'title' => 'Faturamento por tipos',
+                'title' => 'Positivação do Período',
                 'empty-title' => 'Ainda não há dados',
                 'empty-info' => 'Nenhum dado disponível para o intervalo selecionado',
             ],

@@ -30,9 +30,11 @@ class BigQueryService
         $this->config = [
             'enable' => core()->getConfigData('general.bigquery.settings.enable'),
             'project_id' => core()->getConfigData('general.bigquery.settings.project_id'),
-            'dataset_id' => core()->getConfigData('general.bigquery.settings.dataset_id'),
-            'table_id' => core()->getConfigData('general.bigquery.settings.table_id'),
             'service_account' => core()->getConfigData('general.bigquery.settings.service_account'),
+            'revenue_dataset' => core()->getConfigData('general.bigquery.settings.revenue_dataset'),
+            'revenue_table' => core()->getConfigData('general.bigquery.settings.revenue_table'),
+            'positivation_dataset' => core()->getConfigData('general.bigquery.settings.positivation_dataset'),
+            'positivation_table' => core()->getConfigData('general.bigquery.settings.positivation_table'),
         ];
     }
 
@@ -65,14 +67,12 @@ class BigQueryService
             $keyData = json_decode($this->config['service_account'], true);
 
             if (!$keyData) {
-                throw new Exception('Invalid Service Account JSON.');
+                Log::error('BigQuery Service Account JSON is empty or invalid.');
+                return null;
             }
 
             $this->client = new BigQueryClient([
                 'projectId' => $this->config['project_id'],
-                'keyMapper' => function ($key) use ($keyData) {
-                    return $keyData[$key] ?? null;
-                },
                 'keyFile' => $keyData,
             ]);
 
@@ -116,62 +116,134 @@ class BigQueryService
 
             return $results;
         } catch (Exception $e) {
-            Log::error('BigQuery Query Error: ' . $e->getMessage());
+            Log::error('BigQuery Query Error: ' . $e->getMessage() . " | Query: " . $query);
 
             return [];
         }
     }
 
     /**
-     * Get vendor codes by email.
+     * Get vendor codes by emails.
      *
-     * @param  string  $email
+     * @param  array|string  $emails
+     * @param  string        $dataset
+     * @param  string        $table
      * @return array
      */
-    public function getVendorCodesByEmail($email)
+    public function getVendorCodesByEmails($emails, $dataset, $table)
     {
-        $query = "SELECT DISTINCT CODIGO_VENDEDOR 
-                  FROM `{$this->config['project_id']}.{$this->config['dataset_id']}.{$this->config['table_id']}`
-                  WHERE EMAIL_REP = @email";
+        if (empty($emails)) {
+            return [];
+        }
 
-        $results = $this->runQuery($query, ['email' => $email]);
+        $emails = is_array($emails) ? $emails : [$emails];
+
+        $query = "SELECT DISTINCT CODIGO_VENDEDOR 
+                  FROM `{$this->config['project_id']}.{$dataset}.{$table}`
+                  WHERE EMAIL_REP IN UNNEST(@emails)";
+
+        $results = $this->runQuery($query, ['emails' => $emails]);
 
         return array_column($results, 'CODIGO_VENDEDOR');
     }
 
     /**
-     * Get revenue and meta stats for the given period and email.
+     * Get revenue and meta stats for the given period and emails.
      *
-     * @param  string  $email
-     * @param  string  $startDate
-     * @param  string  $endDate
+     * @param  array|string  $emails
+     * @param  string        $startDate
+     * @param  string        $endDate
      * @return array
      */
-    public function getRevenueStats($email, $startDate, $endDate)
+    public function getRevenueStats($emails, $startDate, $endDate)
     {
-        $vendorCodes = $this->getVendorCodesByEmail($email);
+        $dataset = $this->config['revenue_dataset'];
+        $table = $this->config['revenue_table'];
 
-        if (empty($vendorCodes)) {
-            // Fallback to email directly if no vendor code found (though unlikely given validation)
-            $whereClause = "WHERE EMAIL_REP = @email";
-            $params = ['email' => $email];
-        } else {
-            $whereClause = "WHERE CODIGO_VENDEDOR IN UNNEST(@codes)";
-            $params = ['codes' => $vendorCodes];
+        if (!$dataset || !$table) {
+            return ['total_faturamento' => 0, 'total_meta' => 0];
         }
 
-        $query = "SELECT 
-                    SUM(faturamento_semst) as total_faturamento,
-                    MAX(Meta_vendedor) as total_meta
-                  FROM `{$this->config['project_id']}.{$this->config['dataset_id']}.{$this->config['table_id']}`
-                  {$whereClause}
-                  AND DATE(EMISSAO_faturamento) BETWEEN @start AND @end";
+        $vendorCodes = $this->getVendorCodesByEmails($emails, $dataset, $table);
 
-        $params['start'] = $startDate;
-        $params['end'] = $endDate;
+        if (empty($vendorCodes)) {
+            return ['total_faturamento' => 0, 'total_meta' => 0];
+        }
+
+        // Subquery to get max meta per vendor per month, then sum
+        $query = "SELECT 
+                    SUM(faturamento_vendedor) as total_faturamento,
+                    SUM(meta_vendedor_mes) as total_meta
+                  FROM (
+                    SELECT 
+                        FORMAT_DATE('%Y-%m', EMISSAO_faturamento) as mes,
+                        CODIGO_VENDEDOR,
+                        MAX(Meta_vendedor) as meta_vendedor_mes,
+                        SUM(faturamento_semst) as faturamento_vendedor
+                    FROM `{$this->config['project_id']}.{$dataset}.{$table}`
+                    WHERE CODIGO_VENDEDOR IN UNNEST(@codes)
+                    AND DATE(EMISSAO_faturamento) BETWEEN @start AND @end
+                    GROUP BY mes, CODIGO_VENDEDOR
+                  )";
+
+        $params = [
+            'codes' => $vendorCodes,
+            'start' => $startDate,
+            'end' => $endDate,
+        ];
 
         $results = $this->runQuery($query, $params);
 
         return $results[0] ?? ['total_faturamento' => 0, 'total_meta' => 0];
+    }
+
+    /**
+     * Get positivation and meta stats for the given period and emails.
+     *
+     * @param  array|string  $emails
+     * @param  string        $startDate
+     * @param  string        $endDate
+     * @return array
+     */
+    public function getPositivationStats($emails, $startDate, $endDate)
+    {
+        $dataset = $this->config['positivation_dataset'];
+        $table = $this->config['positivation_table'];
+
+        if (!$dataset || !$table) {
+            return ['total_positivacao' => 0, 'total_meta' => 0];
+        }
+
+        $vendorCodes = $this->getVendorCodesByEmails($emails, $dataset, $table);
+
+        if (empty($vendorCodes)) {
+            return ['total_positivacao' => 0, 'total_meta' => 0];
+        }
+
+        // Positivation = Count of distinct CODIGO_CLIENTE
+        $query = "SELECT 
+                    SUM(positivacao_vendedor) as total_positivacao,
+                    SUM(meta_positivacao_mes) as total_meta
+                  FROM (
+                    SELECT 
+                        FORMAT_DATE('%Y-%m', EMISSAO_faturamento) as mes,
+                        CODIGO_VENDEDOR,
+                        MAX(Meta_positivacao) as meta_positivacao_mes,
+                        COUNT(DISTINCT CODIGO_CLIENTE) as positivacao_vendedor
+                    FROM `{$this->config['project_id']}.{$dataset}.{$table}`
+                    WHERE CODIGO_VENDEDOR IN UNNEST(@codes)
+                    AND DATE(EMISSAO_faturamento) BETWEEN @start AND @end
+                    GROUP BY mes, CODIGO_VENDEDOR
+                  )";
+
+        $params = [
+            'codes' => $vendorCodes,
+            'start' => $startDate,
+            'end' => $endDate,
+        ];
+
+        $results = $this->runQuery($query, $params);
+
+        return $results[0] ?? ['total_positivacao' => 0, 'total_meta' => 0];
     }
 }
