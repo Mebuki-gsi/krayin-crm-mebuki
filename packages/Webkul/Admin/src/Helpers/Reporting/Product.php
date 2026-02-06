@@ -29,34 +29,39 @@ class Product extends AbstractReporting
         $bigQueryService = app('bigquery');
 
         if ($bigQueryService->isEnabled()) {
-            $emails = $this->getFilteredUserEmails();
+            try {
+                $emails = $this->getFilteredUserEmails();
 
-            $items = $bigQueryService->getTopSellingProducts(
-                $emails,
-                $this->startDate->format('Y-m-d'),
-                $this->endDate->format('Y-m-d'),
-                $limit
-            );
+                $items = $bigQueryService->getTopSellingProducts(
+                    $emails,
+                    $this->startDate->format('Y-m-d'),
+                    $this->endDate->format('Y-m-d'),
+                    $limit
+                );
 
-            $skus = collect($items)->pluck('code')->toArray();
+                $skus = collect($items)->pluck('code')->toArray();
 
-            $localProducts = DB::table('products')
-                ->whereIn('sku', $skus)
-                ->get(['id', 'sku'])
-                ->keyBy('sku');
+                $localProducts = DB::table('products')
+                    ->whereIn('sku', $skus)
+                    ->get(['id', 'sku'])
+                    ->keyBy('sku');
 
-            return collect($items)->map(function ($item) use ($localProducts) {
-                $product = $localProducts->get($item['code']);
+                return collect($items)->map(function ($item) use ($localProducts) {
+                    $product = $localProducts->get($item['code']);
 
-                return [
-                    'id' => $product ? $product->id : $item['code'],
-                    'name' => $item['name'],
-                    'price' => 0,
-                    'formatted_price' => core()->formatBasePrice(0),
-                    'revenue' => $item['revenue'] ?? 0,
-                    'formatted_revenue' => core()->formatBasePrice($item['revenue'] ?? 0),
-                ];
-            });
+                    return [
+                        'id' => $product ? $product->id : $item['code'],
+                        'name' => $item['name'],
+                        'price' => 0,
+                        'formatted_price' => core()->formatBasePrice(0),
+                        'revenue' => $item['revenue'] ?? 0,
+                        'formatted_revenue' => core()->formatBasePrice($item['revenue'] ?? 0),
+                    ];
+                });
+            } catch (\Exception $e) {
+                // Log the error but don't crash - fall back to local database
+                \Log::error('BigQuery getTopSellingProducts error: ' . $e->getMessage());
+            }
         }
 
         $tablePrefix = DB::getTablePrefix();

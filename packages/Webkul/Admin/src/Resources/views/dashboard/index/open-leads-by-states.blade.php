@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-open-leads--by-states-template">
-                <!-- Shimmer -->
+                    <!-- Shimmer -->
     <template v-if="isLoading">
         <x-admin::shimmer.dashboard.index.open-leads-by-states />
     </template>
@@ -73,7 +73,7 @@
 
             data() {
                 return {
-                    report: [],
+                    report: { statistics: [] },
 
                     isLoading: true,
 
@@ -117,11 +117,15 @@
                         this.chart.destroy();
                     }
 
-                    if (this.report.statistics.length === 0) {
+                    if (!this.report.statistics || this.report.statistics.length === 0) {
                         return;
                     }
 
                     const ctx = document.getElementById(this.$.uid + '_chart')?.getContext('2d');
+
+                    if (!ctx) {
+                        return;
+                    }
 
                     // Create gradient
                     const gradient = ctx.createLinearGradient(0, 0, 0, 400);

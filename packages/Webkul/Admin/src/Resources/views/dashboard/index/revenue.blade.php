@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-revenue-stats-template">
-            <!-- Shimmer -->
+                <!-- Shimmer -->
     <template v-if="isLoading">
         <x-admin::shimmer.dashboard.index.revenue />
     </template>
@@ -103,7 +103,7 @@
 
             data() {
                 return {
-                    report: [],
+                    report: { statistics: { total_won_revenue: { formatted_total: '-', progress: 0, current: 0 }, total_lost_revenue: { formatted_total: '-', progress: 0, current: 0 } } },
 
                     isLoading: true,
 
@@ -147,7 +147,13 @@
                         this.chart.destroy();
                     }
 
-                    this.chart = new Chart(document.getElementById(this.$.uid + '_chart'), {
+                    const ctx = document.getElementById(this.$.uid + '_chart')?.getContext('2d');
+
+                    if (!ctx) {
+                        return;
+                    }
+
+                    this.chart = new Chart(ctx, {
                         type: 'bar',
 
                         data: {

@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-revenue-by-sources-template">
-                    <!-- Shimmer -->
+                        <!-- Shimmer -->
     <template v-if="isLoading">
         <x-admin::shimmer.dashboard.index.revenue-by-sources />
     </template>
@@ -109,7 +109,7 @@
 
             data() {
                 return {
-                    report: [],
+                    report: { statistics: [] },
 
                     colors: [
                         '#8979FF',

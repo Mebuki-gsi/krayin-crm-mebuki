@@ -58,39 +58,44 @@ class Person extends AbstractReporting
         $bigQueryService = app('bigquery');
 
         if ($bigQueryService->isEnabled()) {
-            $emails = $this->getFilteredUserEmails();
+            try {
+                $emails = $this->getFilteredUserEmails();
 
-            $items = $bigQueryService->getTopCustomers(
-                $emails,
-                $this->startDate->format('Y-m-d'),
-                $this->endDate->format('Y-m-d'),
-                $limit
-            );
+                $items = $bigQueryService->getTopCustomers(
+                    $emails,
+                    $this->startDate->format('Y-m-d'),
+                    $this->endDate->format('Y-m-d'),
+                    $limit
+                );
 
-            $emails = collect($items)->pluck('code')->toArray();
+                $itemEmails = collect($items)->pluck('code')->toArray();
 
-            $localPersons = DB::table('persons')
-                ->where(function ($query) use ($emails) {
-                    foreach ($emails as $email) {
-                        $query->orWhere('emails', 'LIKE', '%' . $email . '%');
-                    }
-                })
-                ->get(['id', 'emails']);
+                $localPersons = DB::table('persons')
+                    ->where(function ($query) use ($itemEmails) {
+                        foreach ($itemEmails as $email) {
+                            $query->orWhere('emails', 'LIKE', '%' . $email . '%');
+                        }
+                    })
+                    ->get(['id', 'emails']);
 
-            return collect($items)->map(function ($item) use ($localPersons) {
-                $person = $localPersons->first(function ($p) use ($item) {
-                    return str_contains($p->emails, $item['code']);
+                return collect($items)->map(function ($item) use ($localPersons) {
+                    $person = $localPersons->first(function ($p) use ($item) {
+                        return str_contains($p->emails, $item['code']);
+                    });
+
+                    return [
+                        'id' => $person ? $person->id : $item['code'],
+                        'name' => $item['name'],
+                        'emails' => [],
+                        'contact_numbers' => [],
+                        'revenue' => $item['revenue'] ?? 0,
+                        'formatted_revenue' => core()->formatBasePrice($item['revenue'] ?? 0),
+                    ];
                 });
-
-                return [
-                    'id' => $person ? $person->id : $item['code'],
-                    'name' => $item['name'],
-                    'emails' => [],
-                    'contact_numbers' => [],
-                    'revenue' => $item['revenue'] ?? 0,
-                    'formatted_revenue' => core()->formatBasePrice($item['revenue'] ?? 0),
-                ];
-            });
+            } catch (\Exception $e) {
+                // Log the error but don't crash - fall back to local database
+                \Log::error('BigQuery getTopCustomers error: ' . $e->getMessage());
+            }
         }
 
         $tablePrefix = DB::getTablePrefix();

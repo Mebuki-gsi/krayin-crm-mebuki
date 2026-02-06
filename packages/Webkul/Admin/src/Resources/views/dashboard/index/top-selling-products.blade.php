@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-top-selling-products-template">
-                <!-- Shimmer -->
+                    <!-- Shimmer -->
     <template v-if="isLoading">
         <x-admin::shimmer.dashboard.index.top-selling-products />
     </template>
@@ -78,7 +78,7 @@
 
             data() {
                 return {
-                    report: [],
+                    report: { statistics: [] },
 
                     isLoading: true,
                 }
