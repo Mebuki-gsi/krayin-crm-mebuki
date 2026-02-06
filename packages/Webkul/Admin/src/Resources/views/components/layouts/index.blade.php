@@ -32,7 +32,6 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
 
-    <link rel="preload" as="image" href="{{ url('cache/logo/bagisto.png') }}">
 
     @if ($favicon = core()->getConfigData('general.design.admin_logo.favicon'))
         <link type="image/x-icon" href="{{ Storage::url($favicon) }}" rel="shortcut icon" sizes="16x16">
