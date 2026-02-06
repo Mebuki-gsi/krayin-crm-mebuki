@@ -139,14 +139,19 @@ class BigQueryService
 
         $emails = is_array($emails) ? $emails : [$emails];
         $emails = array_map('strtolower', $emails);
+        sort($emails);
 
-        $query = "SELECT DISTINCT CODIGO_VENDEDOR 
-                  FROM `{$this->config['project_id']}.{$dataset}.{$table}`
-                  WHERE LOWER(EMAIL_REP) IN UNNEST(@emails)";
+        $cacheKey = 'bq_vendor_codes_' . md5(implode(',', $emails) . $dataset . $table);
 
-        $results = $this->runQuery($query, ['emails' => $emails]);
+        return Cache::remember($cacheKey, 86400, function () use ($emails, $dataset, $table) {
+            $query = "SELECT DISTINCT CODIGO_VENDEDOR 
+                      FROM `{$this->config['project_id']}.{$dataset}.{$table}`
+                      WHERE LOWER(EMAIL_REP) IN UNNEST(@emails)";
 
-        return array_column($results, 'CODIGO_VENDEDOR');
+            $results = $this->runQuery($query, ['emails' => $emails]);
+
+            return array_column($results, 'CODIGO_VENDEDOR');
+        });
     }
 
     /**
