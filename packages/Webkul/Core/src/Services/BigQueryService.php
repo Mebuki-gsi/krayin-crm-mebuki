@@ -431,7 +431,13 @@ class BigQueryService
                 LIMIT @limit
             ";
 
-            $jobConfig = $this->client->query($query)
+            $client = $this->getClient();
+
+            if (!$client) {
+                return [];
+            }
+
+            $jobConfig = $client->query($query)
                 ->parameters([
                     'codes' => $vendorCodes,
                     'start' => $startDate,
@@ -439,7 +445,7 @@ class BigQueryService
                     'limit' => (int) $limit,
                 ]);
 
-            $results = $this->client->runQuery($jobConfig);
+            $results = $client->runQuery($jobConfig);
             $items = [];
             foreach ($results as $row) {
                 $items[] = [
@@ -484,7 +490,13 @@ class BigQueryService
                 LIMIT @limit
             ";
 
-            $jobConfig = $this->client->query($query)
+            $client = $this->getClient();
+
+            if (!$client) {
+                return [];
+            }
+
+            $jobConfig = $client->query($query)
                 ->parameters([
                     'codes' => $vendorCodes,
                     'start' => $startDate,
@@ -492,7 +504,7 @@ class BigQueryService
                     'limit' => (int) $limit,
                 ]);
 
-            $results = $this->client->runQuery($jobConfig);
+            $results = $client->runQuery($jobConfig);
             $items = [];
             foreach ($results as $row) {
                 $items[] = [

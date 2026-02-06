@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-open-leads--by-states-template">
-            <!-- Shimmer -->
+                <!-- Shimmer -->
     <template v-if="isLoading">
         <x-admin::shimmer.dashboard.index.open-leads-by-states />
     </template>
@@ -107,7 +107,9 @@
                                 this.prepare();
                             }, 0);
                         })
-                        .catch(error => { });
+                        .catch(error => {
+                            this.isLoading = false;
+                        });
                 },
 
                 prepare() {
