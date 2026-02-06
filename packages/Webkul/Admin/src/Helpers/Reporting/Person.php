@@ -2,6 +2,7 @@
 
 namespace Webkul\Admin\Helpers\Reporting;
 
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Webkul\Contact\Repositories\PersonRepository;
@@ -66,14 +67,28 @@ class Person extends AbstractReporting
                 $limit
             );
 
-            return collect($items)->map(function ($item) {
+            $emails = collect($items)->pluck('code')->toArray();
+
+            $localPersons = DB::table('persons')
+                ->where(function ($query) use ($emails) {
+                    foreach ($emails as $email) {
+                        $query->orWhere('emails', 'LIKE', '%' . $email . '%');
+                    }
+                })
+                ->get(['id', 'emails']);
+
+            return collect($items)->map(function ($item) use ($localPersons) {
+                $person = $localPersons->first(function ($p) use ($item) {
+                    return str_contains($p->emails, $item['code']);
+                });
+
                 return [
-                    'id' => $item['code'],
+                    'id' => $person ? $person->id : $item['code'],
                     'name' => $item['name'],
                     'emails' => [],
                     'contact_numbers' => [],
-                    'revenue' => $item['revenue'],
-                    'formatted_revenue' => core()->formatBasePrice($item['revenue']),
+                    'revenue' => $item['revenue'] ?? 0,
+                    'formatted_revenue' => core()->formatBasePrice($item['revenue'] ?? 0),
                 ];
             });
         }

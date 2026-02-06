@@ -38,14 +38,23 @@ class Product extends AbstractReporting
                 $limit
             );
 
-            return collect($items)->map(function ($item) {
+            $skus = collect($items)->pluck('code')->toArray();
+
+            $localProducts = DB::table('products')
+                ->whereIn('sku', $skus)
+                ->get(['id', 'sku'])
+                ->keyBy('sku');
+
+            return collect($items)->map(function ($item) use ($localProducts) {
+                $product = $localProducts->get($item['code']);
+
                 return [
-                    'id' => $item['code'],
+                    'id' => $product ? $product->id : $item['code'],
                     'name' => $item['name'],
                     'price' => 0,
                     'formatted_price' => core()->formatBasePrice(0),
-                    'revenue' => $item['revenue'],
-                    'formatted_revenue' => core()->formatBasePrice($item['revenue']),
+                    'revenue' => $item['revenue'] ?? 0,
+                    'formatted_revenue' => core()->formatBasePrice($item['revenue'] ?? 0),
                 ];
             });
         }

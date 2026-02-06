@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-top-selling-products-template">
-            <!-- Shimmer -->
+                <!-- Shimmer -->
     <template v-if="isLoading">
         <x-admin::shimmer.dashboard.index.top-selling-products />
     </template>
@@ -26,9 +26,11 @@
 
             <!-- Top Selling Products Details -->
             <div class="flex flex-col" v-if="report.statistics.length">
-                <a :href="`{{route('admin.products.view', '')}}/${item.id}`"
-                    class="flex gap-2.5 border-b p-4 transition-all last:border-b-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-950"
-                    target="_blank" v-for="item in report.statistics">
+                <component :is="isNaN(item.id) ? 'div' : 'a'"
+                    :href="isNaN(item.id) ? null : `{{route('admin.products.view', '')}}/${item.id}`"
+                    class="flex gap-2.5 border-b p-4 transition-all last:border-b-0 dark:border-gray-800"
+                    :class="isNaN(item.id) ? '' : 'hover:bg-gray-50 dark:hover:bg-gray-950'"
+                    v-for="item in report.statistics">
                     <!-- Product Details -->
                     <div class="flex w-full flex-col gap-1.5">
                         <p class="text-gray-600 dark:text-gray-300" v-text="item.name">
@@ -44,7 +46,7 @@
                             </p>
                         </div>
                     </div>
-                </a>
+                </component>
             </div>
 
             <!-- Empty Product Design -->
