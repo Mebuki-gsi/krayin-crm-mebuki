@@ -138,10 +138,11 @@ class BigQueryService
         }
 
         $emails = is_array($emails) ? $emails : [$emails];
+        $emails = array_map('strtolower', $emails);
 
         $query = "SELECT DISTINCT CODIGO_VENDEDOR 
                   FROM `{$this->config['project_id']}.{$dataset}.{$table}`
-                  WHERE EMAIL_REP IN UNNEST(@emails)";
+                  WHERE LOWER(EMAIL_REP) IN UNNEST(@emails)";
 
         $results = $this->runQuery($query, ['emails' => $emails]);
 
@@ -156,7 +157,9 @@ class BigQueryService
      */
     public function determineUserRole($email)
     {
-        return \Illuminate\Support\Facades\Cache::remember('bq_role_' . $email, 86400, function () use ($email) {
+        $email = strtolower($email);
+
+        return \Illuminate\Support\Facades\Cache::remember('bq_role_' . $email, 3600, function () use ($email) {
             $dataset = $this->config['revenue_dataset'];
             $table = $this->config['revenue_table'];
 
@@ -164,9 +167,9 @@ class BigQueryService
                 return 'admin';
             }
 
-            $query = "SELECT 'gerente' as role FROM `{$this->config['project_id']}.{$dataset}.{$table}` WHERE EMAIL_REGIONAL_METAS = @email LIMIT 1
+            $query = "SELECT 'gerente' as role FROM `{$this->config['project_id']}.{$dataset}.{$table}` WHERE LOWER(EMAIL_REGIONAL_METAS) = @email LIMIT 1
                       UNION ALL 
-                      SELECT 'vendedor' as role FROM `{$this->config['project_id']}.{$dataset}.{$table}` WHERE EMAIL_REP = @email LIMIT 1";
+                      SELECT 'vendedor' as role FROM `{$this->config['project_id']}.{$dataset}.{$table}` WHERE LOWER(EMAIL_REP) = @email LIMIT 1";
 
             $results = $this->runQuery($query, ['email' => $email]);
 
@@ -192,7 +195,9 @@ class BigQueryService
      */
     public function getSubordinates($managerEmail)
     {
-        return \Illuminate\Support\Facades\Cache::remember('bq_subordinates_' . $managerEmail, 86400, function () use ($managerEmail) {
+        $managerEmail = strtolower($managerEmail);
+
+        return \Illuminate\Support\Facades\Cache::remember('bq_subordinates_' . $managerEmail, 3600, function () use ($managerEmail) {
             $dataset = $this->config['revenue_dataset'];
             $table = $this->config['revenue_table'];
 
@@ -202,7 +207,7 @@ class BigQueryService
 
             $query = "SELECT DISTINCT EMAIL_REP 
                       FROM `{$this->config['project_id']}.{$dataset}.{$table}`
-                      WHERE EMAIL_REGIONAL_METAS = @managerEmail";
+                      WHERE LOWER(EMAIL_REGIONAL_METAS) = @managerEmail";
 
             $results = $this->runQuery($query, ['managerEmail' => $managerEmail]);
 
@@ -238,21 +243,40 @@ class BigQueryService
                 return ['total_faturamento' => 0, 'total_meta' => 0];
             }
 
-            // Subquery to get max meta per vendor per month, then sum
-            $query = "SELECT 
-                        SUM(faturamento_vendedor) as total_faturamento,
-                        SUM(meta_vendedor_mes) as total_meta
-                    FROM (
-                        SELECT 
-                            FORMAT_DATE('%Y-%m', EMISSAO_faturamento) as mes,
-                            CODIGO_VENDEDOR,
-                            MAX(Meta_vendedor) as meta_vendedor_mes,
-                            SUM(faturamento_semst) as faturamento_vendedor
-                        FROM `{$this->config['project_id']}.{$dataset}.{$table}`
-                        WHERE CODIGO_VENDEDOR IN UNNEST(@codes)
-                        AND DATE(EMISSAO_faturamento) BETWEEN @start AND @end
-                        GROUP BY mes, CODIGO_VENDEDOR
-                    )";
+            // Refined query: 
+            // 1. Sum faturamento for exact range.
+            // 2. Sum unique monthly metas for the full months in range (ensuring meta shows even with 0 sales).
+            $query = "
+                WITH raw_data AS (
+                    SELECT 
+                        CODIGO_VENDEDOR,
+                        DATE(EMISSAO_faturamento) as data_emissao,
+                        FORMAT_DATE('%Y-%m', EMISSAO_faturamento) as mes,
+                        COALESCE(faturamento_semst, 0) as fat,
+                        COALESCE(Meta_vendedor, 0) as meta
+                    FROM `{$this->config['project_id']}.{$dataset}.{$table}`
+                    WHERE CODIGO_VENDEDOR IN UNNEST(@codes)
+                    AND DATE(EMISSAO_faturamento) BETWEEN DATE_TRUNC(@start, MONTH) AND LAST_DAY(@end)
+                ),
+                monthly_metas AS (
+                    SELECT 
+                        CODIGO_VENDEDOR,
+                        mes,
+                        MAX(meta) as meta_mes
+                    FROM raw_data
+                    GROUP BY CODIGO_VENDEDOR, mes
+                ),
+                faturamento_sum AS (
+                    SELECT 
+                        SUM(fat) as total_faturamento
+                    FROM raw_data
+                    WHERE data_emissao BETWEEN @start AND @end
+                )
+                SELECT 
+                    COALESCE(f.total_faturamento, 0) as total_faturamento,
+                    COALESCE((SELECT SUM(meta_mes) FROM monthly_metas), 0) as total_meta
+                FROM faturamento_sum f
+            ";
 
             $params = [
                 'codes' => $vendorCodes,

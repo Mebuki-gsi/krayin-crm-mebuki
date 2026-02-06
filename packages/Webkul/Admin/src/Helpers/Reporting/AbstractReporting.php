@@ -127,8 +127,8 @@ abstract class AbstractReporting
             foreach ($selectedEmails as $email) {
                 // Security check for Gerente: can only select self or subordinates
                 if ($currentUserRole == 'gerente') {
-                    $subordinates = $bigQueryService->getSubordinates($user->email);
-                    if ($email != $user->email && !in_array($email, $subordinates)) {
+                    $subordinates = array_map('strtolower', $bigQueryService->getSubordinates($user->email));
+                    if (strtolower($email) != strtolower($user->email) && !in_array(strtolower($email), $subordinates)) {
                         continue;
                     }
                 }
@@ -189,14 +189,13 @@ abstract class AbstractReporting
             $user = auth()->user();
             $bigQueryService = app('bigquery');
 
-            $isSalesperson = false;
             if ($user && $bigQueryService->isEnabled()) {
-                $isSalesperson = $bigQueryService->determineUserRole($user->email) == 'vendedor';
+                $role = $bigQueryService->determineUserRole($user->email);
+                $isSalesperson = $role == 'vendedor';
             } elseif ($user) {
                 $isSalesperson = $user->view_permission == 'individual';
             }
 
-            // Default to 'This Month' for salespeople
             if ($isSalesperson) {
                 $this->startDate = now()->startOfMonth()->startOfDay();
             } else {
