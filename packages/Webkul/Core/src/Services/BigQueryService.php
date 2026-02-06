@@ -305,8 +305,8 @@ class BigQueryService
         $cacheKey = 'bq_pos_' . md5(implode(',', $emails) . $startDate . $endDate);
 
         return \Illuminate\Support\Facades\Cache::remember($cacheKey, 1800, function () use ($emails, $startDate, $endDate) {
-            $dataset = $this->config['positivation_dataset'];
-            $table = $this->config['positivation_table'];
+            $dataset = $this->config['positivation_dataset'] ?? $this->config['revenue_dataset'];
+            $table = $this->config['positivation_table'] ?? $this->config['revenue_table'];
 
             if (!$dataset || !$table) {
                 return ['total_positivacao' => 0, 'total_meta' => 0];
@@ -318,21 +318,40 @@ class BigQueryService
                 return ['total_positivacao' => 0, 'total_meta' => 0];
             }
 
-            // Positivation = Count of distinct CODIGO_CLIENTE
-            $query = "SELECT 
-                        SUM(positivacao_vendedor) as total_positivacao,
-                        SUM(meta_positivacao_mes) as total_meta
-                    FROM (
-                        SELECT 
-                            FORMAT_DATE('%Y-%m', EMISSAO_faturamento) as mes,
-                            CODIGO_VENDEDOR,
-                            MAX(Meta_positivacao) as meta_positivacao_mes,
-                            COUNT(DISTINCT CODIGO_CLIENTE) as positivacao_vendedor
-                        FROM `{$this->config['project_id']}.{$dataset}.{$table}`
-                        WHERE CODIGO_VENDEDOR IN UNNEST(@codes)
-                        AND DATE(EMISSAO_faturamento) BETWEEN @start AND @end
-                        GROUP BY mes, CODIGO_VENDEDOR
-                    )";
+            // Positivation: 
+            // 1. Count distinct COD_ORIGEM in range.
+            // 2. Sum unique monthly meta_positivacao.
+            $query = "
+                WITH raw_data AS (
+                    SELECT 
+                        CODIGO_VENDEDOR,
+                        COD_ORIGEM,
+                        DATE(EMISSAO_faturamento) as data_emissao,
+                        FORMAT_DATE('%Y-%m', EMISSAO_faturamento) as mes,
+                        COALESCE(meta_positivacao, 0) as meta
+                    FROM `{$this->config['project_id']}.{$dataset}.{$table}`
+                    WHERE CODIGO_VENDEDOR IN UNNEST(@codes)
+                    AND DATE(EMISSAO_faturamento) BETWEEN DATE_TRUNC(@start, MONTH) AND LAST_DAY(@end)
+                ),
+                monthly_metas AS (
+                    SELECT 
+                        CODIGO_VENDEDOR,
+                        mes,
+                        MAX(meta) as meta_mes
+                    FROM raw_data
+                    GROUP BY CODIGO_VENDEDOR, mes
+                ),
+                positivacao_sum AS (
+                    SELECT 
+                        COUNT(DISTINCT COD_ORIGEM) as total_positivacao
+                    FROM raw_data
+                    WHERE data_emissao BETWEEN @start AND @end
+                )
+                SELECT 
+                    COALESCE(p.total_positivacao, 0) as total_positivacao,
+                    COALESCE((SELECT SUM(meta_mes) FROM monthly_metas), 0) as total_meta
+                FROM positivacao_sum p
+            ";
 
             $params = [
                 'codes' => $vendorCodes,
@@ -343,6 +362,35 @@ class BigQueryService
             $results = $this->runQuery($query, $params);
 
             return $results[0] ?? ['total_positivacao' => 0, 'total_meta' => 0];
+        });
+    }
+
+    /**
+     * Get all managers from BigQuery.
+     * 
+     * @return array
+     */
+    public function getManagers()
+    {
+        return Cache::remember('bq_managers', 86400, function () {
+            $dataset = $this->config['revenue_dataset'];
+            $table = $this->config['revenue_table'];
+
+            if (!$dataset || !$table) {
+                return [];
+            }
+
+            $query = "
+                SELECT DISTINCT 
+                    LOWER(TRIM(EMAIL_REGIONAL_METAS)) as email,
+                    ANY_VALUE(GERENCIA_REGIONAL) as name
+                FROM `{$this->config['project_id']}.{$dataset}.{$table}`
+                WHERE EMAIL_REGIONAL_METAS IS NOT NULL 
+                  AND EMAIL_REGIONAL_METAS != ''
+                GROUP BY email
+            ";
+
+            return $this->runQuery($query);
         });
     }
 }

@@ -104,14 +104,23 @@ abstract class AbstractReporting
             }
 
             $selectedEmails = [];
-            if ($requestedUserId = request('user_id')) {
+
+            // Case 1: Filter by Manager (higher precedence for Admin)
+            if ($managerEmail = request('manager_email')) {
+                $selectedEmails = array_map('strtolower', $bigQueryService->getSubordinates($managerEmail));
+                $selectedEmails[] = strtolower($managerEmail);
+            }
+            // Case 2: Filter by specific Users
+            elseif ($requestedUserId = request('user_id')) {
                 $ids = is_array($requestedUserId) ? $requestedUserId : [$requestedUserId];
 
                 $selectedEmails = app(\Webkul\User\Repositories\UserRepository::class)
                     ->findWhereIn('id', $ids)
                     ->pluck('email')
                     ->toArray();
-            } else {
+            }
+            // Case 3: Default logic based on role
+            else {
                 if ($currentUserRole == 'gerente') {
                     $selectedEmails = [$user->email];
                 } else {
@@ -198,11 +207,8 @@ abstract class AbstractReporting
                 $isSalesperson = $user->view_permission == 'individual';
             }
 
-            if ($isSalesperson) {
-                $this->startDate = now()->startOfMonth()->startOfDay();
-            } else {
-                $this->startDate = now()->subDays(30)->startOfDay();
-            }
+            // Default to 'This Month' for all users as requested
+            $this->startDate = now()->startOfMonth()->startOfDay();
         }
 
         $this->setLastStartDate();
