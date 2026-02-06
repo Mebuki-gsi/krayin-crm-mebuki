@@ -25,15 +25,31 @@ class DashboardController extends Controller
     ];
 
     /**
+     * UserRepository object
+     *
+     * @var \Webkul\User\Repositories\UserRepository
+     */
+    protected $userRepository;
+
+    /**
+     * LeadRepository object
+     *
+     * @var \Webkul\Lead\Repositories\LeadRepository
+     */
+    protected $leadRepository;
+
+    /**
      * Create a new controller instance.
      *
      * @return void
      */
     public function __construct(
         protected Dashboard $dashboardHelper,
-        protected UserRepository $userRepository,
-        protected LeadRepository $leadRepository
+        UserRepository $userRepository,
+        LeadRepository $leadRepository
     ) {
+        $this->userRepository = $userRepository;
+        $this->leadRepository = $leadRepository;
     }
 
     /**
@@ -51,7 +67,6 @@ class DashboardController extends Controller
         $users = collect([]); // Initialize users as a collection
         $startDate = $this->dashboardHelper->getStartDate(); // Define startDate
         $endDate = $this->dashboardHelper->getEndDate();     // Define endDate
-        $totalWonLeads = 0; // Placeholder for totalWonLeads, as it's not defined in the snippet
 
         if ($bigQueryService->isEnabled()) {
             $role = $bigQueryService->determineUserRole($user->email);
