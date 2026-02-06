@@ -271,7 +271,7 @@ class Lead extends AbstractReporting
      * @param  \Carbon\Carbon  $startDate
      * @param  \Carbon\Carbon  $endDate
      */
-    public function getTotalWonLeads($startDate, $endDate): int
+    public function getWonLeadsCount($startDate, $endDate): int
     {
         $query = $this->leadRepository
             ->resetModel()

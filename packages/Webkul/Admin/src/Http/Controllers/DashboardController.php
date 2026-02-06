@@ -5,6 +5,7 @@ namespace Webkul\Admin\Http\Controllers;
 use Webkul\Admin\Helpers\Dashboard;
 use Webkul\User\Repositories\UserRepository;
 use Webkul\Lead\Repositories\LeadRepository;
+use Webkul\Admin\Helpers\Reporting\Lead as LeadReporting;
 
 class DashboardController extends Controller
 {
@@ -101,7 +102,7 @@ class DashboardController extends Controller
             }
         }
 
-        $totalWonLeads = app(\Webkul\Admin\Helpers\Reporting\Lead::class)->getTotalWonLeads($startDate, $endDate);
+        $totalWonLeads = app(LeadReporting::class)->getWonLeadsCount($startDate, $endDate);
 
         return view('admin::dashboard.index')->with([
             'startDate' => $startDate,
