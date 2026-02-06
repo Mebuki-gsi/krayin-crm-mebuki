@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-revenue-by-sources-template">
-            <!-- Shimmer -->
+                <!-- Shimmer -->
     <template v-if="isLoading">
         <x-admin::shimmer.dashboard.index.revenue-by-sources />
     </template>
@@ -59,7 +59,7 @@
                             </div>
                             <div v-if="report.statistics[0].percentage > 100"
                                 class="mt-2 text-xs font-semibold text-green-600">
-                                ¡Meta Superada!
+                                Meta Superada!
                             </div>
                         </div>
                     </div>
