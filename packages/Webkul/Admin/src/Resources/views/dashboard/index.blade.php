@@ -66,18 +66,18 @@
             <!-- Revenue by Types -->
             {{-- @include('admin::dashboard.index.open-leads-by-states') --}}
 
-            <!-- Revenue by Sources -->
-            {{-- @include('admin::dashboard.index.revenue-by-sources') --}}
+            <!-- Revenue by Sources (Faturamento Atual / Meta) -->
+            @include('admin::dashboard.index.revenue-by-sources')
 
-            <!-- Revenue by Types -->
-            {{-- @include('admin::dashboard.index.revenue-by-types') --}}
+            <!-- Revenue by Types (Clientes Positivados) -->
+            @include('admin::dashboard.index.revenue-by-types')
         </div>
 
         {!! view_render_event('admin.dashboard.index.content.right.after') !!}
     </div>
 
     @pushOnce('scripts')
-        <script type="module" src="{{ asset('vite/assets/app.js') }}"></script>
+        {{-- app.js is already included in layout, removing redundant 404 script --}}
          
         <script
             type="module"
