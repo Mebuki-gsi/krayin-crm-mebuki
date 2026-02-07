@@ -3,11 +3,11 @@
 @pushOnce('scripts')
     <!-- SEO Vue Component Template -->
     <script type="text/x-template" id="v-charts-doughnut-template">
-            <canvas
-                :id="$.uid + '_chart'"
-                class="flex w-full max-w-full items-end"
-            ></canvas>
-        </script>
+                <canvas
+                    :id="$.uid + '_chart'"
+                    class="flex w-full max-w-full items-end"
+                ></canvas>
+            </script>
 
     <script type="module">
         app.component('v-charts-doughnut', {
@@ -16,12 +16,12 @@
             props: {
                 labels: {
                     type: Array,
-                    default: [],
+                    default: () => [],
                 },
 
                 datasets: {
                     type: Array,
-                    default: true,
+                    default: () => [],
                 },
             },
 

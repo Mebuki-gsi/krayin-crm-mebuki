@@ -3,13 +3,13 @@
 @pushOnce('scripts')
     <!-- SEO Vue Component Template -->
     <script type="text/x-template" id="v-charts-bar-template">
-            <canvas
-                :id="$.uid + '_chart'"
-                class="flex w-full max-w-full items-end"
-                :style="'aspect-ratio:' + aspectRatio + '/1'"
-                style=""
-            ></canvas>
-        </script>
+                <canvas
+                    :id="$.uid + '_chart'"
+                    class="flex w-full max-w-full items-end"
+                    :style="'aspect-ratio:' + aspectRatio + '/1'"
+                    style=""
+                ></canvas>
+            </script>
 
     <script type="module">
         app.component('v-charts-bar', {
@@ -18,12 +18,12 @@
             props: {
                 labels: {
                     type: Array,
-                    default: [],
+                    default: () => [],
                 },
 
                 datasets: {
                     type: Array,
-                    default: [],
+                    default: () => [],
                 },
 
                 aspectRatio: {

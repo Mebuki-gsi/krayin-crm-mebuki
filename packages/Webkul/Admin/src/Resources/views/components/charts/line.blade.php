@@ -3,12 +3,12 @@
 @pushOnce('scripts')
     <!-- SEO Vue Component Template -->
     <script type="text/x-template" id="v-charts-line-template">
-            <canvas
-                :id="$.uid + '_chart'"
-                class="flex w-full items-end"
-                :style="'aspect-ratio:' + aspectRatio + '/1'"
-            ></canvas>
-        </script>
+                <canvas
+                    :id="$.uid + '_chart'"
+                    class="flex w-full items-end"
+                    :style="'aspect-ratio:' + aspectRatio + '/1'"
+                ></canvas>
+            </script>
 
     <script type="module">
         app.component('v-charts-line', {
@@ -17,12 +17,12 @@
             props: {
                 labels: {
                     type: Array,
-                    default: [],
+                    default: () => [],
                 },
 
                 datasets: {
                     type: Array,
-                    default: true,
+                    default: () => [],
                 },
 
                 aspectRatio: {
@@ -70,32 +70,32 @@
                                     display: false
                                 },
 
-                                    {{-- tooltip: {
-                        enabled: false,
-                    } --}
-            }
-        },
+                                tooltips: {
+                                    enabled: false,
+                                }
+                            },
+                        },
 
-            scales: {
-            x: {
-                beginAtZero: true,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
 
-                border: {
-                    dash: [8, 4],
-                }
-            },
+                                border: {
+                                    dash: [8, 4],
+                                }
+                            },
 
-            y: {
-                beginAtZero: true,
-                border: {
-                    dash: [8, 4],
-                }
-            }
-        }
+                            y: {
+                                beginAtZero: true,
+                                border: {
+                                    dash: [8, 4],
+                                }
                             }
-                        });
+                        }
                     }
-                }
-            });
+                            });
+                        }
+                    }
+                });
     </script>
 @endPushOnce
