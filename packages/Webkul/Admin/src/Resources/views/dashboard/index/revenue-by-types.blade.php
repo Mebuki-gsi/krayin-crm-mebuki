@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-revenue-by-types-template">
-                    <!-- Shimmer -->
+                        <!-- Shimmer -->
     <template v-if="isLoading">
         <x-admin::shimmer.dashboard.index.revenue-by-types />
     </template>
@@ -52,14 +52,14 @@
                         <!-- Progress Bar Container -->
                         <div class="relative pt-1">
                             <div
-                                class="overflow-hidden h-4 text-xs flex rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                                class="overflow-hidden h-6 text-xs flex rounded-full bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
                                 <div :style="{ width: Math.min(report.statistics[0].percentage, 100) + '%' }"
-                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-500"
-                                    :class="report.statistics[0].percentage >= 100 ? 'bg-green-500' : 'bg-orange-500'">
+                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-500 font-bold"
+                                    :class="report.statistics[0].percentage >= 100 ? 'bg-emerald-500' : 'bg-amber-500'">
                                 </div>
                             </div>
                             <div v-if="report.statistics[0].percentage > 100"
-                                class="mt-2 text-xs font-semibold text-green-600">
+                                class="mt-2 text-xs font-semibold text-emerald-600">
                                 Meta Superada!
                             </div>
                         </div>
