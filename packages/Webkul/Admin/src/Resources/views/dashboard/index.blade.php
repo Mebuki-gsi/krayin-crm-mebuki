@@ -20,13 +20,13 @@
             <!-- Actions -->
             {!! view_render_event('admin.dashboard.index.header.right.before') !!}
 
-            {{-- <v-dashboard-filters>
+            <v-dashboard-filters>
                 <!-- Shimmer -->
                 <div class="flex gap-1.5">
                     <div class="light-shimmer-bg dark:shimmer h-[39px] w-[140px] rounded-md"></div>
                     <div class="light-shimmer-bg dark:shimmer h-[39px] w-[140px] rounded-md"></div>
                 </div>
-            </v-dashboard-filters> --}}
+            </v-dashboard-filters>
 
             {!! view_render_event('admin.dashboard.index.header.right.after') !!}
         </div>
@@ -42,7 +42,7 @@
 
             <div class="flex flex-1 flex-col gap-4 max-xl:flex-auto">
                 <!-- Revenue Stats -->
-                {{-- @include('admin::dashboard.index.revenue') --}}
+                @include('admin::dashboard.index.revenue')
 
                 <!-- Over All Stats -->
                 {{-- @include('admin::dashboard.index.over-all') --}}
@@ -88,7 +88,7 @@
             <script type="module" src="https://cdn.jsdelivr.net/npm/chartjs-chart-funnel@4.2.1/build/index.umd.min.js">
             </script>
 
-            {{--
+            
             <script type="text/x-template" id="v-dashboard-filters-template">
                                                     {!! view_render_event('admin.dashboard.index.date_filters.before') !!}
 
@@ -217,6 +217,6 @@
                          toggleUser(userId) {                         const index = this.filters.user_id.indexOf(userId);                         if (index > -1) {                             this.filters.user_id.splice(index, 1);                         } else {                             this.filters.user_id.push(userId);                         }                     }                 },
                      watch: {                     filters: {                         handler(newValue) {                             this.$emitter.emit('reporting-filter-updated', newValue);                         },
                              deep: true,                         immediate: true                     }                 },             });
-            </script> --}}
+            </script>
         @endPushOnce
 </x-admin::layouts>
