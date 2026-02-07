@@ -4,77 +4,40 @@
     </x-slot:title>
 
     <!-- Content -->
-    <div class="flex gap-4 max-lg:flex-wrap">
-        <!-- Left Section -->
-        <div class="flex flex-1 flex-col gap-4 max-lg:flex-auto">
-            <!-- Header -->
-            <div
-                class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
-                <p class="text-base font-bold text-gray-600 dark:text-gray-300">
-                    @lang('admin::app.dashboard.index.title')
-                </p>
+    <div class="flex flex-col gap-4">
+        <!-- Header -->
+        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
+            <p class="text-base font-bold text-gray-600 dark:text-gray-300">
+                @lang('admin::app.dashboard.index.title')
+            </p>
 
-                <!-- Actions -->
-                {!! view_render_event('admin.dashboard.index.header.right.before') !!}
+            <!-- Actions -->
+            {!! view_render_event('admin.dashboard.index.header.right.before') !!}
 
-                <div class="flex items-center gap-1.5 focus:outline-none">
-                    <span class="icon-calendar text-2xl text-gray-600 dark:text-gray-300"></span>
+            <div class="flex items-center gap-1.5 focus:outline-none">
+                <span class="icon-calendar text-2xl text-gray-600 dark:text-gray-300"></span>
 
-                    <!-- Date Filters -->
-                    <v-dashboard-filters>
-                        <!-- Shimmer -->
-                        <div class="flex gap-1.5">
-                            <div class="light-shimmer-bg dark:shimmer h-[39px] w-[140px] rounded-md"></div>
-                            <div class="light-shimmer-bg dark:shimmer h-[39px] w-[140px] rounded-md"></div>
-                        </div>
-                    </v-dashboard-filters>
-                </div>
-
-                {!! view_render_event('admin.dashboard.index.header.right.after') !!}
+                <!-- Date Filters -->
+                <v-dashboard-filters>
+                    <!-- Shimmer -->
+                    <div class="flex gap-1.5">
+                        <div class="light-shimmer-bg dark:shimmer h-[39px] w-[140px] rounded-md"></div>
+                        <div class="light-shimmer-bg dark:shimmer h-[39px] w-[140px] rounded-md"></div>
+                    </div>
+                </v-dashboard-filters>
             </div>
 
-            {!! view_render_event('admin.dashboard.index.content.left.after') !!}
-
-            <!-- Cards Section -->
-            <div class="flex flex-col gap-4">
-                {!! view_render_event('admin.dashboard.index.revenue.before') !!}
-
-                <!-- Revenue Stats Vue Component -->
-                <!-- <v-dashboard-revenue-stats>
-                <x-admin::shimmer.dashboard.index.revenue />
-            </v-dashboard-revenue-stats> -->
-                {{-- @include('admin::dashboard.index.over-all') --}}
-
-                <!-- Total Leads Stats -->
-                {{-- @include('admin::dashboard.index.total-leads') --}}
-
-                <div class="flex gap-4 max-lg:flex-wrap">
-                    <!-- Total Products -->
-                    {{-- @include('admin::dashboard.index.top-selling-products') --}}
-
-                    <!-- Total Persons -->
-                    {{-- @include('admin::dashboard.index.top-persons') --}}
-                </div>
-            </div>
-
-            {!! view_render_event('admin.dashboard.index.content.left.after') !!}
+            {!! view_render_event('admin.dashboard.index.header.right.after') !!}
         </div>
 
-        <!-- Right Section -->
-        {!! view_render_event('admin.dashboard.index.content.right.before') !!}
-
-        <div class="flex w-[378px] max-w-full flex-col gap-4 max-sm:w-full">
-            <!-- Revenue by Types -->
-            {{-- @include('admin::dashboard.index.open-leads-by-states') --}}
-
+        <!-- Custom Cards Grid -->
+        <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
             <!-- Revenue by Sources (Faturamento Atual / Meta) -->
             @include('admin::dashboard.index.revenue-by-sources')
 
             <!-- Revenue by Types (Clientes Positivados) -->
             @include('admin::dashboard.index.revenue-by-types')
         </div>
-
-        {!! view_render_event('admin.dashboard.index.content.right.after') !!}
     </div>
 
     @pushOnce('scripts')
