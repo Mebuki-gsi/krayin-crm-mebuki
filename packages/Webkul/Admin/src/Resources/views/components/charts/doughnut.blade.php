@@ -2,15 +2,12 @@
 
 @pushOnce('scripts')
     <!-- SEO Vue Component Template -->
-    <script
-        type="text/x-template"
-        id="v-charts-doughnut-template"
-    >
-        <canvas
-            :id="$.uid + '_chart'"
-            class="flex w-full max-w-full items-end"
-        ></canvas>
-    </script>
+    <script type="text/x-template" id="v-charts-doughnut-template">
+            <canvas
+                :id="$.uid + '_chart'"
+                class="flex w-full max-w-full items-end"
+            ></canvas>
+        </script>
 
     <script type="module">
         app.component('v-charts-doughnut', {
@@ -18,12 +15,12 @@
 
             props: {
                 labels: {
-                    type: Array, 
+                    type: Array,
                     default: [],
                 },
 
                 datasets: {
-                    type: Array, 
+                    type: Array,
                     default: true,
                 },
             },
@@ -44,15 +41,21 @@
                         this.chart.destroy();
                     }
 
-                    this.chart = new Chart(document.getElementById(this.$.uid + '_chart'), {
+                    const ctx = document.getElementById(this.$.uid + '_chart');
+
+                    if (!ctx) {
+                        return;
+                    }
+
+                    this.chart = new Chart(ctx, {
                         type: 'doughnut',
-                        
+
                         data: {
                             labels: this.labels,
 
                             datasets: this.datasets,
                         },
-                
+
                         options: {
                             plugins: {
                                 legend: {

@@ -2,17 +2,14 @@
 
 @pushOnce('scripts')
     <!-- SEO Vue Component Template -->
-    <script
-        type="text/x-template"
-        id="v-charts-bar-template"
-    >
-        <canvas
-            :id="$.uid + '_chart'"
-            class="flex w-full max-w-full items-end"
-            :style="'aspect-ratio:' + aspectRatio + '/1'"
-            style=""
-        ></canvas>
-    </script>
+    <script type="text/x-template" id="v-charts-bar-template">
+            <canvas
+                :id="$.uid + '_chart'"
+                class="flex w-full max-w-full items-end"
+                :style="'aspect-ratio:' + aspectRatio + '/1'"
+                style=""
+            ></canvas>
+        </script>
 
     <script type="module">
         app.component('v-charts-bar', {
@@ -48,18 +45,24 @@
             methods: {
                 prepare() {
                     const barCount = this.datasets.length;
-                    
+
                     this.datasets.forEach((dataset) => {
                         dataset.barThickness = Math.max(4, 36 / barCount);
                     });
-        
+
                     if (this.chart) {
                         this.chart.destroy();
                     }
 
-                    this.chart = new Chart(document.getElementById(this.$.uid + '_chart'), {
+                    const ctx = document.getElementById(this.$.uid + '_chart');
+
+                    if (!ctx) {
+                        return;
+                    }
+
+                    this.chart = new Chart(ctx, {
                         type: 'bar',
-                        
+
                         data: {
                             labels: this.labels,
 
@@ -68,13 +71,13 @@
 
                         options: {
                             aspectRatio: this.aspectRatio,
-                            
+
                             plugins: {
                                 legend: {
                                     display: false
                                 },
                             },
-                            
+
                             scales: {
                                 x: {
                                     beginAtZero: true,

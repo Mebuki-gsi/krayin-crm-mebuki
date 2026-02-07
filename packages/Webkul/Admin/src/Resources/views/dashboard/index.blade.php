@@ -227,7 +227,7 @@
                     computed: {
                         selectedUsersLabel() {
                             if (!this.filters.user_id || this.filters.user_id.length === 0) {
-                                return "{{ __('All Users') }}";
+                                return @json(__('All Users'));
                             }
 
                             if (this.filters.user_id.length === 1) {
@@ -241,11 +241,11 @@
 
                         selectedManagerLabel() {
                             if (!this.filters.manager_email) {
-                                return "{{ __('All Managers') }}";
+                                return @json(__('All Managers'));
                             }
 
                             const manager = this.managers.find(m => m.email === this.filters.manager_email);
-                            return manager ? manager.name : "{{ __('Manager') }}";
+                            return manager ? manager.name : @json(__('Manager'));
                         }
                     },
 
