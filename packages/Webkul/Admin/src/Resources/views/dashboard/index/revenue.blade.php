@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-revenue-stats-template">
-                <!-- Shimmer -->
+                    <!-- Shimmer -->
     <template v-if="isLoading">
         <x-admin::shimmer.dashboard.index.revenue />
     </template>
@@ -158,8 +158,8 @@
 
                         data: {
                             labels: [
-                                "@lang('admin::app.dashboard.index.revenue.won-revenue')",
-                                "@lang('admin::app.dashboard.index.revenue.lost-revenue')"
+                                @json(__('admin::app.dashboard.index.revenue.won-revenue')),
+                                @json(__('admin::app.dashboard.index.revenue.lost-revenue'))
                             ],
 
                             datasets: [{
