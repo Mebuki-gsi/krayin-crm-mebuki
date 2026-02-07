@@ -42,17 +42,17 @@
                 @include('admin::dashboard.index.revenue')
 
                 <!-- Over All Stats -->
-                @include('admin::dashboard.index.over-all')
+                {{-- @include('admin::dashboard.index.over-all') --}}
 
                 <!-- Total Leads Stats -->
-                @include('admin::dashboard.index.total-leads')
+                {{-- @include('admin::dashboard.index.total-leads') --}}
 
                 <div class="flex gap-4 max-lg:flex-wrap">
                     <!-- Total Products -->
-                    @include('admin::dashboard.index.top-selling-products')
+                    {{-- @include('admin::dashboard.index.top-selling-products') --}}
 
                     <!-- Total Persons -->
-                    @include('admin::dashboard.index.top-persons')
+                    {{-- @include('admin::dashboard.index.top-persons') --}}
                 </div>
             </div>
 
@@ -64,13 +64,13 @@
 
         <div class="flex w-[378px] max-w-full flex-col gap-4 max-sm:w-full">
             <!-- Revenue by Types -->
-            @include('admin::dashboard.index.open-leads-by-states')
+            {{-- @include('admin::dashboard.index.open-leads-by-states') --}}
 
             <!-- Revenue by Sources -->
-            @include('admin::dashboard.index.revenue-by-sources')
+            {{-- @include('admin::dashboard.index.revenue-by-sources') --}}
 
             <!-- Revenue by Types -->
-            @include('admin::dashboard.index.revenue-by-types')
+            {{-- @include('admin::dashboard.index.revenue-by-types') --}}
         </div>
 
         {!! view_render_event('admin.dashboard.index.content.right.after') !!}
