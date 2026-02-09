@@ -541,12 +541,12 @@ class BigQueryService
         return Cache::remember($cacheKey, now()->addDays(30), function () use ($emails) {
             $projectId = $this->config['project_id'];
 
-            // First, get FANTASIA_PAD values for the given emails
+            // First, get FANTASIA_PAD values for the given vendor emails
+            // Use EMAIL_REP from VendasHistoricasDois (NOT CarteiraGeral.Email which is client email)
             $fantasiaPadQuery = "
                 SELECT DISTINCT FANTASIA_PAD 
-                FROM `{$projectId}.VENDAS.CarteiraGeral`
-                WHERE LOWER(Email) IN UNNEST(@emails)
-                   OR FANTASIA_PAD IN UNNEST(@emails)
+                FROM `{$projectId}.VENDAS.VendasHistoricasDois`
+                WHERE LOWER(EMAIL_REP) IN UNNEST(@emails)
             ";
 
             $client = $this->getClient();

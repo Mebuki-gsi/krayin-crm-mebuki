@@ -13,7 +13,7 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-dashboard-client-risk-analysis-template">
-            <!-- Shimmer -->
+                <!-- Shimmer -->
     <template v-if="isLoading">
         <div class="grid gap-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <div class="shimmer h-6 w-48"></div>
@@ -46,10 +46,10 @@
             <!-- Summary Cards -->
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" v-if="report.summary">
                 <div v-for="(count, key) in report.summary" :key="key" @click="toggleFilter(key)" :class="[
-                                'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                activeFilter === key ? 'ring-2 ring-offset-2' : '',
-                                getCardClass(key)
-                            ]">
+                                    'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                                    activeFilter === key ? 'ring-2 ring-offset-2' : '',
+                                    getCardClass(key)
+                                ]">
                     <p class="text-2xl font-bold">@{{ count }}</p>
                     <p class="text-xs truncate">@{{ getLabel(key) }}</p>
                 </div>
@@ -82,9 +82,9 @@
                     </thead>
                     <tbody>
                         <tr v-for="(client, index) in paginatedClients" :key="client.cnpj" :class="[
-                                        'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors',
-                                        checkedClients[client.cnpj] ? 'opacity-50 bg-gray-100 dark:bg-gray-800' : ''
-                                    ]">
+                                            'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors',
+                                            checkedClients[client.cnpj] ? 'opacity-50 bg-gray-100 dark:bg-gray-800' : ''
+                                        ]">
                             <td class="p-2">
                                 <input type="checkbox" :checked="checkedClients[client.cnpj]"
                                     @change="toggleClient(client.cnpj)" class="rounded">
@@ -94,12 +94,12 @@
                                     :title="client.razao">
                                     @{{ client.razao || 'N/A' }}
                                 </div>
-                                <div class="text-xs text-gray-500">@{{ client.cnpj }}</div>
+                                <div class="text-xs text-gray-600 dark:text-gray-300">@{{ client.cnpj }}</div>
                             </td>
-                            <td class="p-2 hidden sm:table-cell text-gray-600 dark:text-gray-400 text-xs">
+                            <td class="p-2 hidden sm:table-cell text-gray-700 dark:text-gray-200 text-xs">
                                 @{{ client.segmento || '-' }}
                             </td>
-                            <td class="p-2 hidden md:table-cell text-gray-600 dark:text-gray-400">
+                            <td class="p-2 hidden md:table-cell text-gray-700 dark:text-gray-200">
                                 @{{ client.uf || '-' }}
                             </td>
                             <td class="p-2 text-right font-medium">
@@ -230,16 +230,16 @@
                         <p class="text-xs text-purple-600/70">Ticket Médio</p>
                     </div>
                     <div :class="[
-                                'rounded-lg p-3 text-center',
-                                selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' : 
-                                selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' : 
-                                'bg-green-50 dark:bg-green-900/30'
-                            ]">
+                                    'rounded-lg p-3 text-center',
+                                    selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' : 
+                                    selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' : 
+                                    'bg-green-50 dark:bg-green-900/30'
+                                ]">
                         <p :class="[
-                                    'text-2xl font-bold',
-                                    selectedClient.dias_sem_compra > 90 ? 'text-red-600' : 
-                                    selectedClient.dias_sem_compra > 30 ? 'text-yellow-600' : 'text-green-600'
-                                ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
+                                        'text-2xl font-bold',
+                                        selectedClient.dias_sem_compra > 90 ? 'text-red-600' : 
+                                        selectedClient.dias_sem_compra > 30 ? 'text-yellow-600' : 'text-green-600'
+                                    ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
                         <p class="text-xs opacity-70">Dias s/ Compra</p>
                     </div>
                 </div>
@@ -423,33 +423,33 @@
 
                 getCardClass(key) {
                     const classes = {
-                        'ATIVO_FREQUENTE': 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700',
-                        'ATIVO_REGULAR': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700',
-                        'RISCO_INATIVACAO': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700',
-                        'OPORTUNIDADE_RECUPERACAO': 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700',
-                        'INATIVO_BAIXO_POTENCIAL': 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600',
-                        'SEM_HISTORICO': 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-300 dark:border-gray-600'
+                        'ATIVO_FREQUENTE': 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 border-green-400 dark:border-green-600',
+                        'ATIVO_REGULAR': 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border-blue-400 dark:border-blue-600',
+                        'RISCO_INATIVACAO': 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 border-yellow-400 dark:border-yellow-600',
+                        'OPORTUNIDADE_RECUPERACAO': 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200 border-purple-400 dark:border-purple-600',
+                        'INATIVO_BAIXO_POTENCIAL': 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-100 border-gray-400 dark:border-gray-500',
+                        'SEM_HISTORICO': 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-100 border-slate-400 dark:border-slate-500'
                     };
-                    return classes[key] || 'bg-gray-100 text-gray-600 border-gray-300';
+                    return classes[key] || 'bg-gray-200 text-gray-700 border-gray-400';
                 },
 
                 getStatusBadge(key) {
                     const classes = {
-                        'ATIVO_FREQUENTE': 'bg-green-100 text-green-700',
-                        'ATIVO_REGULAR': 'bg-blue-100 text-blue-700',
-                        'RISCO_INATIVACAO': 'bg-yellow-100 text-yellow-700',
-                        'OPORTUNIDADE_RECUPERACAO': 'bg-purple-100 text-purple-700',
-                        'INATIVO_BAIXO_POTENCIAL': 'bg-gray-200 text-gray-600',
-                        'SEM_HISTORICO': 'bg-gray-200 text-gray-500'
+                        'ATIVO_FREQUENTE': 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
+                        'ATIVO_REGULAR': 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100',
+                        'RISCO_INATIVACAO': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
+                        'OPORTUNIDADE_RECUPERACAO': 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100',
+                        'INATIVO_BAIXO_POTENCIAL': 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-100',
+                        'SEM_HISTORICO': 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100'
                     };
-                    return classes[key] || 'bg-gray-200 text-gray-600';
+                    return classes[key] || 'bg-gray-200 text-gray-700';
                 },
 
                 getDaysClass(days) {
-                    if (!days && days !== 0) return 'text-gray-400';
-                    if (days > 90) return 'text-red-600 font-bold';
-                    if (days > 30) return 'text-yellow-600 font-medium';
-                    return 'text-green-600';
+                    if (!days && days !== 0) return 'text-gray-500 dark:text-gray-300';
+                    if (days > 90) return 'text-red-600 dark:text-red-400 font-bold';
+                    if (days > 30) return 'text-yellow-600 dark:text-yellow-400 font-medium';
+                    return 'text-green-600 dark:text-green-400';
                 }
             }
         });
