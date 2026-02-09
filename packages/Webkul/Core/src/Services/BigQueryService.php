@@ -588,7 +588,7 @@ class BigQueryService
                         FANTASIA_PAD AS fantasia_pad
                     FROM `{$projectId}.VENDAS.CarteiraGeral`
                     WHERE FANTASIA_PAD IN UNNEST(@fantasia_pads)
-                      AND Status_Carteira IN ('ATIVO', 'INATIVO')
+                      AND Status_Carteira = 'ATIVO'
                 ),
                 vendas_agg AS (
                     SELECT 
@@ -627,16 +627,12 @@ class BigQueryService
                     DATE_DIFF(CURRENT_DATE(), v.ultima_compra, DAY) AS dias_sem_compra,
                     t.threshold AS ticket_threshold,
                     CASE 
-                        WHEN c.status_carteira = 'ATIVO' AND DATE_DIFF(CURRENT_DATE(), v.ultima_compra, DAY) > 90 
+                        WHEN DATE_DIFF(CURRENT_DATE(), v.ultima_compra, DAY) > 90 
                             THEN 'RISCO_INATIVACAO'
-                        WHEN c.status_carteira = 'ATIVO' AND DATE_DIFF(CURRENT_DATE(), v.ultima_compra, DAY) <= 30 
+                        WHEN DATE_DIFF(CURRENT_DATE(), v.ultima_compra, DAY) <= 30 
                             THEN 'ATIVO_FREQUENTE'
-                        WHEN c.status_carteira = 'ATIVO' 
+                        WHEN v.ultima_compra IS NOT NULL
                             THEN 'ATIVO_REGULAR'
-                        WHEN c.status_carteira = 'INATIVO' AND v.valor_total >= t.threshold 
-                            THEN 'OPORTUNIDADE_RECUPERACAO'
-                        WHEN c.status_carteira = 'INATIVO' 
-                            THEN 'INATIVO_BAIXO_POTENCIAL'
                         ELSE 'SEM_HISTORICO'
                     END AS classificacao_risco
                 FROM carteira c
