@@ -64,6 +64,49 @@ abstract class AbstractReporting
             return;
         }
 
+        $bigQueryService = app('bigquery');
+
+        // BQ Enforced Security: Override CRM permissions if BQ is active & user is seller/manager
+        if ($bigQueryService->isEnabled()) {
+            $role = $bigQueryService->determineUserRole($user->email);
+
+            if ($role == 'vendedor') {
+                // Strict: Seller ONLY sees their own data
+                $query->where($column, $user->id);
+                return;
+            }
+
+            if ($role == 'gerente') {
+                // Strict: Manager sees self + subordinates
+                $subordinateEmails = $bigQueryService->getSubordinates($user->email);
+                $subordinateEmails[] = $user->email; // Add self
+
+                // Resolve Emails to IDs
+                $allowedUserIds = app(\Webkul\User\Repositories\UserRepository::class)
+                    ->findWhereIn('email', array_unique($subordinateEmails))
+                    ->pluck('id')
+                    ->toArray();
+
+                // Intersect with requested filter (security check)
+                if ($requestedUserId = request('user_id')) {
+                    $requestedIds = is_array($requestedUserId) ? $requestedUserId : [$requestedUserId];
+                    $allowedRequested = array_intersect($requestedIds, $allowedUserIds);
+
+                    if (!empty($allowedRequested)) {
+                        $query->whereIn($column, $allowedRequested);
+                    } else {
+                        // Security violation: requested user outside hierarchy
+                        $query->whereRaw('1 = 0');
+                    }
+                } else {
+                    // Default: Show all subordinates + self
+                    $query->whereIn($column, $allowedUserIds);
+                }
+                return;
+            }
+        }
+
+        // Default CRM Logic (Fallback or Admin)
         if ($user->view_permission == 'individual') {
             $query->where($column, $user->id);
         } else {
