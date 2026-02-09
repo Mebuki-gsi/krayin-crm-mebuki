@@ -27,7 +27,9 @@ class DashboardController extends Controller
         'toggle-client-check' => 'toggleClientCheck',
         'check-history' => 'getCheckHistory',
         'checked-clients' => 'getCheckedClients',
+        'create-lead-from-client' => 'createLeadFromClient',
     ];
+
 
     /**
      * UserRepository object

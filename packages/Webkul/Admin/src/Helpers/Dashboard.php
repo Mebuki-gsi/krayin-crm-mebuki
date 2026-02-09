@@ -247,4 +247,117 @@ class Dashboard
 
         return ['checked_cnpjs' => $checked];
     }
+
+    /**
+     * Create a lead from client risk analysis data.
+     * This creates Organization, Person, and Lead with pre-filled data.
+     */
+    public function createLeadFromClient(): array
+    {
+        $user = auth()->user();
+
+        // Get client data from request
+        $cnpj = request('cnpj');
+        $razao = request('razao');
+        $telefone = request('telefone');
+        $email = request('email');
+        $segmento = request('segmento');
+        $municipio = request('municipio');
+        $uf = request('uf');
+        $valorTotal = request('valor_total', 0);
+        $ticketMedio = request('ticket_medio', 0);
+        $totalPedidos = request('total_pedidos', 0);
+        $diasSemCompra = request('dias_sem_compra', 0);
+        $classificacao = request('classificacao_risco', '');
+
+        if (!$cnpj || !$razao || !$user) {
+            return ['success' => false, 'message' => 'Dados incompletos'];
+        }
+
+        try {
+            // 1. Create or find Organization
+            $organizationRepo = app(\Webkul\Contact\Repositories\OrganizationRepository::class);
+            $organization = $organizationRepo->findOneWhere(['name' => $razao]);
+
+            if (!$organization) {
+                $organization = $organizationRepo->create([
+                    'name' => $razao,
+                    'address' => [
+                        'city' => $municipio,
+                        'state' => $uf,
+                        'country' => 'BR',
+                    ],
+                    'user_id' => $user->id,
+                ]);
+            }
+
+            // 2. Create or find Person
+            $personRepo = app(\Webkul\Contact\Repositories\PersonRepository::class);
+
+            // Try to find by email first
+            $person = null;
+            if ($email) {
+                $person = $personRepo->whereJsonContains('emails', [['value' => $email]])->first();
+            }
+
+            if (!$person) {
+                $emailsArray = $email ? [['value' => $email, 'label' => 'work']] : [];
+                $phonesArray = $telefone ? [['value' => $telefone, 'label' => 'work']] : [];
+
+                $person = $personRepo->create([
+                    'name' => $razao,
+                    'emails' => $emailsArray,
+                    'contact_numbers' => $phonesArray,
+                    'organization_id' => $organization->id,
+                    'user_id' => $user->id,
+                ]);
+            }
+
+            // 3. Build description with all client info
+            $description = "📋 **Dados do Cliente BigQuery**\n\n";
+            $description .= "**CNPJ:** {$cnpj}\n";
+            $description .= "**Segmento:** {$segmento}\n";
+            $description .= "**Localização:** {$municipio}/{$uf}\n\n";
+            $description .= "📊 **Histórico de Vendas**\n";
+            $description .= "- Total em Vendas: R$ " . number_format($valorTotal, 2, ',', '.') . "\n";
+            $description .= "- Ticket Médio: R$ " . number_format($ticketMedio, 2, ',', '.') . "\n";
+            $description .= "- Total de Pedidos: {$totalPedidos}\n";
+            $description .= "- Dias sem Compra: {$diasSemCompra}\n\n";
+            $description .= "⚠️ **Status:** {$classificacao}\n";
+            $description .= "\n---\n_Lead criado automaticamente via Análise de Risco de Carteira_";
+
+            // 4. Get default pipeline and first stage
+            $pipelineRepo = app(\Webkul\Lead\Repositories\PipelineRepository::class);
+            $pipeline = $pipelineRepo->getDefaultPipeline();
+            $stage = $pipeline->stages()->first();
+
+            // 5. Create Lead
+            $leadRepo = app(\Webkul\Lead\Repositories\LeadRepository::class);
+
+            $lead = $leadRepo->create([
+                'title' => "Reativação - {$razao}",
+                'description' => $description,
+                'lead_value' => $valorTotal,
+                'status' => 1,
+                'user_id' => $user->id,
+                'person_id' => $person->id,
+                'lead_pipeline_id' => $pipeline->id,
+                'lead_pipeline_stage_id' => $stage->id,
+            ]);
+
+            return [
+                'success' => true,
+                'lead_id' => $lead->id,
+                'message' => 'Lead criado com sucesso!',
+                'redirect_url' => route('admin.leads.view', $lead->id),
+            ];
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Create lead from client error: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Erro ao criar lead: ' . $e->getMessage(),
+            ];
+        }
+    }
 }
