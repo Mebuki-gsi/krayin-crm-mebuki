@@ -677,4 +677,80 @@ class BigQueryService
             }
         });
     }
+    /**
+     * Get active CNPJs for the given emails.
+     * Used for filtering contacts in CRM based on BigQuery carteira.
+     *
+     * @param  array|string  $emails
+     * @return array
+     */
+    public function getActiveCnpjs($emails): array
+    {
+        if (!$this->isEnabled()) {
+            return [];
+        }
+
+        // Normalize emails to array
+        if (is_string($emails)) {
+            $emails = [$emails];
+        }
+
+        // Cache for 4 hours
+        $cacheKey = "bq_active_cnpjs_" . md5(json_encode($emails));
+
+        return Cache::remember($cacheKey, now()->addHours(4), function () use ($emails) {
+            $projectId = $this->config['project_id'];
+
+            // 1. Get FANTASIA_PAD from VendasHistoricasDois using emails
+            $fantasiaPadQuery = "
+                SELECT DISTINCT FANTASIA_PAD 
+                FROM `{$projectId}.VENDAS.VendasHistoricasDois`
+                WHERE LOWER(EMAIL_REP) IN UNNEST(@emails)
+            ";
+
+            $client = $this->getClient();
+            if (!$client) {
+                return [];
+            }
+
+            $lowerEmails = array_map('strtolower', $emails);
+            $jobConfig = $client->query($fantasiaPadQuery)
+                ->parameters(['emails' => $lowerEmails]);
+            $results = $client->runQuery($jobConfig);
+
+            $fantasiaPads = [];
+            foreach ($results as $row) {
+                if (!empty($row['FANTASIA_PAD'])) {
+                    $fantasiaPads[] = $row['FANTASIA_PAD'];
+                }
+            }
+
+            if (empty($fantasiaPads)) {
+                return [];
+            }
+
+            // 2. Get active CNPJs from CarteiraGeral using FANTASIA_PAD
+            $query = "
+                SELECT DISTINCT
+                    REGEXP_REPLACE(REGEXP_REPLACE(COD_ORIGEM, r\"['\\.\-/]\", ''), r'[^0-9]', '') AS cnpj
+                FROM `{$projectId}.VENDAS.CarteiraGeral`
+                WHERE FANTASIA_PAD IN UNNEST(@fantasia_pads)
+                  AND Status_Carteira = 'ATIVO'
+            ";
+
+            $jobConfig = $client->query($query)
+                ->parameters(['fantasia_pads' => $fantasiaPads]);
+
+            $results = $client->runQuery($jobConfig);
+            $cnpjs = [];
+
+            foreach ($results as $row) {
+                if (!empty($row['cnpj'])) {
+                    $cnpjs[] = $row['cnpj'];
+                }
+            }
+
+            return $cnpjs;
+        });
+    }
 }

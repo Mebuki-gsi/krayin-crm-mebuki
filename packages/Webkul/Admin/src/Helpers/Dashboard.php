@@ -283,6 +283,7 @@ class Dashboard
             if (!$organization) {
                 $organization = $organizationRepo->create([
                     'name' => $razao,
+                    'cnpj' => $cnpj,
                     'address' => [
                         'city' => $municipio,
                         'state' => $uf,
