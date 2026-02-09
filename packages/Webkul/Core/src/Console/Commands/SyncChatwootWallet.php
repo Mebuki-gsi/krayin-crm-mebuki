@@ -86,11 +86,14 @@ class SyncChatwootWallet extends Command
                 $organizations = $this->organizationRepository->findWhereIn('cnpj', $chunk);
                 $orgIds = $organizations->pluck('id')->toArray();
 
+                $this->info("   > Chunk info: Found " . count($orgIds) . " organizations in CRM matching these CNPJs.");
+
                 if (empty($orgIds))
                     continue;
 
                 // 3. Find Contacts linked to these Organizations
                 $people = $this->personRepository->findWhereIn('organization_id', $orgIds);
+                $this->info("   > Org info: Found " . count($people) . " people in these organizations.");
 
                 foreach ($people as $person) {
                     // Extract email
@@ -103,11 +106,14 @@ class SyncChatwootWallet extends Command
                         }
                     }
 
-                    if (!$targetEmail)
+                    if (!$targetEmail) {
+                        $this->line("     - Person {$person->name} skipped (no valid email).");
                         continue;
+                    }
 
                     // 4. Sync with Chatwoot
                     // Search contact
+                    $this->line("     - Searching Chatwoot for: {$targetEmail}...");
                     $contact = $this->chatwootService->searchContact($targetEmail);
 
                     if ($contact) {
@@ -120,14 +126,14 @@ class SyncChatwootWallet extends Command
                         ]);
 
                         if ($updated) {
-                            $this->line("   [OK] Synced {$targetEmail}");
+                            $this->info("     [OK] Synced {$targetEmail}");
                             $processedCount++;
                         } else {
-                            $this->error("   [ERR] Failed to update {$targetEmail}");
+                            $this->error("     [ERR] Failed to update {$targetEmail}");
                         }
                     } else {
                         // Contact not found in Chatwoot
-                        // $this->warn("   [MISS] Contact not found in Chatwoot: {$targetEmail}");
+                        $this->warn("     [MISS] Contact not found in Chatwoot: {$targetEmail}");
                     }
                 }
             }
