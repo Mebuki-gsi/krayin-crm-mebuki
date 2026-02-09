@@ -5,6 +5,7 @@ namespace Webkul\Core\Providers;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 use Webkul\Core\Acl;
+use Webkul\Core\Console\Commands\SyncChatwootWallet;
 use Webkul\Core\Console\Commands\Version;
 use Webkul\Core\Core;
 use Webkul\Core\Facades\Acl as AclFacade;
@@ -88,6 +89,7 @@ class CoreServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                SyncChatwootWallet::class,
                 Version::class,
             ]);
         }
