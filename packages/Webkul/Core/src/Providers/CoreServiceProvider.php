@@ -90,6 +90,7 @@ class CoreServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 SyncChatwootWallet::class,
+                \Webkul\Core\Console\Commands\InspectData::class,
                 Version::class,
             ]);
         }
