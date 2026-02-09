@@ -259,6 +259,7 @@ class Dashboard
         // Get client data from request
         $cnpj = request('cnpj');
         $razao = request('razao');
+        $nomeContato = request('nome_contato', $razao); // Contact name, fallback to company name
         $telefone = request('telefone');
         $email = request('email');
         $segmento = request('segmento');
@@ -305,13 +306,15 @@ class Dashboard
                 $phonesArray = $telefone ? [['value' => $telefone, 'label' => 'work']] : [];
 
                 $person = $personRepo->create([
-                    'name' => $razao,
+                    'entity_type' => 'persons',
+                    'name' => $nomeContato,
                     'emails' => $emailsArray,
                     'contact_numbers' => $phonesArray,
                     'organization_id' => $organization->id,
                     'user_id' => $user->id,
                 ]);
             }
+
 
             // 3. Build description with all client info
             $description = "📋 **Dados do Cliente BigQuery**\n\n";
@@ -335,6 +338,7 @@ class Dashboard
             $leadRepo = app(\Webkul\Lead\Repositories\LeadRepository::class);
 
             $lead = $leadRepo->create([
+                'entity_type' => 'leads',
                 'title' => "Reativação - {$razao}",
                 'description' => $description,
                 'lead_value' => $valorTotal,
@@ -344,6 +348,7 @@ class Dashboard
                 'lead_pipeline_id' => $pipeline->id,
                 'lead_pipeline_stage_id' => $stage->id,
             ]);
+
 
             return [
                 'success' => true,
