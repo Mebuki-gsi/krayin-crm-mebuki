@@ -570,4 +570,52 @@ class Lead extends AbstractReporting
                 return $date->format('M d');
         }
     }
+
+    /**
+     * Get client risk analysis for the current user.
+     * Returns clients classified by risk level (ATIVO_FREQUENTE, RISCO_INATIVACAO, etc.)
+     *
+     * @return array
+     */
+    public function getClientRiskAnalysis(): array
+    {
+        $bigQueryService = app('bigquery');
+
+        if (!$bigQueryService->isEnabled()) {
+            return [];
+        }
+
+        $emails = $this->getFilteredUserEmails();
+
+        if (empty($emails)) {
+            return [];
+        }
+
+        $clients = $bigQueryService->getClientRiskAnalysis($emails);
+
+        // Group clients by classification
+        $summary = [
+            'ATIVO_FREQUENTE' => 0,
+            'ATIVO_REGULAR' => 0,
+            'RISCO_INATIVACAO' => 0,
+            'OPORTUNIDADE_RECUPERACAO' => 0,
+            'INATIVO_BAIXO_POTENCIAL' => 0,
+            'SEM_HISTORICO' => 0,
+        ];
+
+        foreach ($clients as $client) {
+            $classification = $client['classificacao_risco'] ?? 'SEM_HISTORICO';
+            if (isset($summary[$classification])) {
+                $summary[$classification]++;
+            }
+        }
+
+        return [
+            'clients' => $clients,
+            'summary' => $summary,
+            'total' => count($clients),
+            'ticket_threshold' => $clients[0]['ticket_threshold'] ?? 0,
+            'last_updated' => now()->toIso8601String(),
+        ];
+    }
 }

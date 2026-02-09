@@ -516,4 +516,169 @@ class BigQueryService
             return $items;
         });
     }
+
+    /**
+     * Get client risk analysis for the logged-in vendor.
+     * Classifies clients as ATIVO_FREQUENTE, RISCO_INATIVACAO, OPORTUNIDADE_RECUPERACAO, etc.
+     *
+     * @param  array|string  $emails
+     * @return array
+     */
+    public function getClientRiskAnalysis($emails): array
+    {
+        if (!$this->isEnabled()) {
+            return [];
+        }
+
+        // Normalize emails to array
+        if (is_string($emails)) {
+            $emails = [$emails];
+        }
+
+        // Cache for 30 days (monthly refresh)
+        $cacheKey = "bq_client_risk_" . md5(json_encode($emails));
+
+        return Cache::remember($cacheKey, now()->addDays(30), function () use ($emails) {
+            $projectId = $this->config['project_id'];
+
+            // First, get FANTASIA_PAD values for the given emails
+            $fantasiaPadQuery = "
+                SELECT DISTINCT FANTASIA_PAD 
+                FROM `{$projectId}.VENDAS.CarteiraGeral`
+                WHERE LOWER(Email) IN UNNEST(@emails)
+                   OR FANTASIA_PAD IN UNNEST(@emails)
+            ";
+
+            $client = $this->getClient();
+            if (!$client) {
+                return [];
+            }
+
+            // Get FANTASIA_PAD for these emails
+            $lowerEmails = array_map('strtolower', $emails);
+            $jobConfig = $client->query($fantasiaPadQuery)
+                ->parameters(['emails' => $lowerEmails]);
+            $results = $client->runQuery($jobConfig);
+
+            $fantasiaPads = [];
+            foreach ($results as $row) {
+                if (!empty($row['FANTASIA_PAD'])) {
+                    $fantasiaPads[] = $row['FANTASIA_PAD'];
+                }
+            }
+
+            if (empty($fantasiaPads)) {
+                Log::warning('Client Risk Analysis: No FANTASIA_PAD found for emails', ['emails' => $emails]);
+                return [];
+            }
+
+            // Main analysis query with dynamic ticket threshold
+            $query = "
+                WITH carteira AS (
+                    SELECT DISTINCT
+                        REGEXP_REPLACE(REGEXP_REPLACE(COD_ORIGEM, r\"['\\.\-/]\", ''), r'[^0-9]', '') AS cnpj,
+                        COD_ORIGEM AS cnpj_original,
+                        Razao AS razao,
+                        Status_Carteira AS status_carteira,
+                        Segmento AS segmento,
+                        UF AS uf,
+                        Municipio AS municipio,
+                        Telefone AS telefone,
+                        Email AS email,
+                        FANTASIA_PAD AS fantasia_pad
+                    FROM `{$projectId}.VENDAS.CarteiraGeral`
+                    WHERE FANTASIA_PAD IN UNNEST(@fantasia_pads)
+                      AND Status_Carteira IN ('ATIVO', 'INATIVO')
+                ),
+                vendas_agg AS (
+                    SELECT 
+                        COD_ORIGEM AS cnpj,
+                        COUNT(DISTINCT PEDIDO) AS total_pedidos,
+                        SUM(SAFE_CAST(TOTAL_ITEM AS FLOAT64)) AS valor_total,
+                        MAX(PARSE_DATE('%Y-%m-%d', SUBSTR(EMISSAO, 1, 10))) AS ultima_compra,
+                        MIN(PARSE_DATE('%Y-%m-%d', SUBSTR(EMISSAO, 1, 10))) AS primeira_compra,
+                        AVG(SAFE_CAST(TOTAL_ITEM AS FLOAT64)) AS ticket_medio
+                    FROM `{$projectId}.VENDAS.VendasHistoricasDois`
+                    WHERE FANTASIA_PAD IN UNNEST(@fantasia_pads)
+                    GROUP BY COD_ORIGEM
+                ),
+                ticket_medio_ativos AS (
+                    SELECT COALESCE(AVG(v.valor_total), 0) AS threshold
+                    FROM carteira c
+                    LEFT JOIN vendas_agg v ON c.cnpj = v.cnpj
+                    WHERE c.status_carteira = 'ATIVO'
+                      AND v.valor_total IS NOT NULL
+                )
+                SELECT 
+                    c.cnpj_original,
+                    c.razao,
+                    c.status_carteira,
+                    c.segmento,
+                    c.uf,
+                    c.municipio,
+                    c.telefone,
+                    c.email,
+                    c.fantasia_pad,
+                    COALESCE(v.total_pedidos, 0) AS total_pedidos,
+                    COALESCE(v.valor_total, 0) AS valor_total,
+                    v.ultima_compra,
+                    v.primeira_compra,
+                    COALESCE(v.ticket_medio, 0) AS ticket_medio,
+                    DATE_DIFF(CURRENT_DATE(), v.ultima_compra, DAY) AS dias_sem_compra,
+                    t.threshold AS ticket_threshold,
+                    CASE 
+                        WHEN c.status_carteira = 'ATIVO' AND DATE_DIFF(CURRENT_DATE(), v.ultima_compra, DAY) > 90 
+                            THEN 'RISCO_INATIVACAO'
+                        WHEN c.status_carteira = 'ATIVO' AND DATE_DIFF(CURRENT_DATE(), v.ultima_compra, DAY) <= 30 
+                            THEN 'ATIVO_FREQUENTE'
+                        WHEN c.status_carteira = 'ATIVO' 
+                            THEN 'ATIVO_REGULAR'
+                        WHEN c.status_carteira = 'INATIVO' AND v.valor_total >= t.threshold 
+                            THEN 'OPORTUNIDADE_RECUPERACAO'
+                        WHEN c.status_carteira = 'INATIVO' 
+                            THEN 'INATIVO_BAIXO_POTENCIAL'
+                        ELSE 'SEM_HISTORICO'
+                    END AS classificacao_risco
+                FROM carteira c
+                LEFT JOIN vendas_agg v ON c.cnpj = v.cnpj
+                CROSS JOIN ticket_medio_ativos t
+                ORDER BY v.valor_total DESC NULLS LAST
+            ";
+
+            try {
+                $jobConfig = $client->query($query)
+                    ->parameters(['fantasia_pads' => $fantasiaPads]);
+
+                $results = $client->runQuery($jobConfig);
+                $clients = [];
+
+                foreach ($results as $row) {
+                    $clients[] = [
+                        'cnpj' => $row['cnpj_original'],
+                        'razao' => $row['razao'],
+                        'status_carteira' => $row['status_carteira'],
+                        'segmento' => $row['segmento'],
+                        'uf' => $row['uf'],
+                        'municipio' => $row['municipio'],
+                        'telefone' => $row['telefone'],
+                        'email' => $row['email'],
+                        'total_pedidos' => (int) $row['total_pedidos'],
+                        'valor_total' => (float) $row['valor_total'],
+                        'ultima_compra' => $row['ultima_compra'],
+                        'primeira_compra' => $row['primeira_compra'],
+                        'ticket_medio' => (float) $row['ticket_medio'],
+                        'dias_sem_compra' => (int) ($row['dias_sem_compra'] ?? 0),
+                        'classificacao_risco' => $row['classificacao_risco'],
+                        'ticket_threshold' => (float) ($row['ticket_threshold'] ?? 0),
+                    ];
+                }
+
+                return $clients;
+
+            } catch (Exception $e) {
+                Log::error('Client Risk Analysis Error: ' . $e->getMessage());
+                return [];
+            }
+        });
+    }
 }
