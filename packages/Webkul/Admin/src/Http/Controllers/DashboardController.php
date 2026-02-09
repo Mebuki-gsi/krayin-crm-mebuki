@@ -89,6 +89,7 @@ class DashboardController extends Controller
             } elseif ($role == 'vendedor') {
                 // Salespeople should not be able to filter other users
                 $users = collect([]);
+                $managers = [];
                 $defaultUserId = $user->id;
             } else {
                 // Admin: can see all users OR filter by manager
@@ -96,14 +97,12 @@ class DashboardController extends Controller
                 $managers = $bigQueryService->getManagers();
             }
         } else {
-            // Non-BigQuery logic remains unchanged
-            // The original code had a match statement, but the provided snippet simplifies it.
-            // Reverting to the original logic for non-BigQuery if the intent was not to change it entirely.
-            // Based on the provided snippet, it seems the intent was to simplify this part.
+            // Non-BigQuery logic
             $users = $this->userRepository->all();
 
             if ($user->view_permission == 'individual') {
-                $users = collect([$user]);
+                $users = collect([]); // Hide dropdown
+                $managers = [];
                 $defaultUserId = $user->id;
             }
         }
