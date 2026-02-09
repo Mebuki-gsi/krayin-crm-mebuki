@@ -24,6 +24,9 @@ class DashboardController extends Controller
         'top-persons' => 'getTopPersons',
         'open-leads-by-states' => 'getOpenLeadsByStates',
         'client-risk-analysis' => 'getClientRiskStats',
+        'toggle-client-check' => 'toggleClientCheck',
+        'check-history' => 'getCheckHistory',
+        'checked-clients' => 'getCheckedClients',
     ];
 
     /**

@@ -148,4 +148,103 @@ class Dashboard
     {
         return $this->leadReporting->getClientRiskAnalysis();
     }
+
+    /**
+     * Toggle client check status.
+     * Saves to database for historical tracking.
+     */
+    public function toggleClientCheck(): array
+    {
+        $user = auth()->user();
+        $cnpj = request('cnpj');
+        $clientName = request('client_name');
+        $classification = request('classification');
+        $isChecked = request('is_checked', true);
+
+        if (!$cnpj || !$user) {
+            return ['success' => false, 'message' => 'Invalid request'];
+        }
+
+        $tracking = \Webkul\Core\Models\ClientWorkTracking::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'client_cnpj' => $cnpj,
+            ],
+            [
+                'client_name' => $clientName,
+                'classification' => $classification,
+                'is_checked' => $isChecked,
+                'checked_at' => $isChecked ? now() : null,
+                'unchecked_at' => !$isChecked ? now() : null,
+            ]
+        );
+
+        return [
+            'success' => true,
+            'is_checked' => $tracking->is_checked,
+            'checked_at' => $tracking->checked_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * Get check history for date range (for chart).
+     */
+    public function getCheckHistory(): array
+    {
+        $user = auth()->user();
+        $startDate = $this->getStartDate();
+        $endDate = $this->getEndDate();
+
+        // Get daily counts
+        $dailyCounts = \Webkul\Core\Models\ClientWorkTracking::where('user_id', $user->id)
+            ->where('is_checked', true)
+            ->whereBetween('checked_at', [$startDate, $endDate->endOfDay()])
+            ->selectRaw('DATE(checked_at) as date, COUNT(*) as count')
+            ->groupByRaw('DATE(checked_at)')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date')
+            ->toArray();
+
+        // Fill in missing dates with 0
+        $allDates = [];
+        $current = $startDate->copy();
+        while ($current <= $endDate) {
+            $dateStr = $current->format('Y-m-d');
+            $allDates[$dateStr] = $dailyCounts[$dateStr] ?? 0;
+            $current->addDay();
+        }
+
+        // Get today's count
+        $todayCount = \Webkul\Core\Models\ClientWorkTracking::where('user_id', $user->id)
+            ->where('is_checked', true)
+            ->whereDate('checked_at', now()->toDateString())
+            ->count();
+
+        // Get total for period
+        $totalPeriod = array_sum($allDates);
+
+        return [
+            'daily_counts' => $allDates,
+            'today_count' => $todayCount,
+            'total_period' => $totalPeriod,
+            'labels' => array_keys($allDates),
+            'data' => array_values($allDates),
+        ];
+    }
+
+    /**
+     * Get all checked client CNPJs for the current user.
+     */
+    public function getCheckedClients(): array
+    {
+        $user = auth()->user();
+
+        $checked = \Webkul\Core\Models\ClientWorkTracking::where('user_id', $user->id)
+            ->where('is_checked', true)
+            ->pluck('client_cnpj')
+            ->toArray();
+
+        return ['checked_cnpjs' => $checked];
+    }
 }
