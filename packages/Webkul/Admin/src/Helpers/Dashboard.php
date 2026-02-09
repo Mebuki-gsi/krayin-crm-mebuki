@@ -161,6 +161,14 @@ class Dashboard
         $classification = request('classification');
         $isChecked = request('is_checked', true);
 
+        return $this->toggleClientCheckInternal($user, $cnpj, $clientName, $classification, $isChecked);
+    }
+
+    /**
+     * Internal method to toggle client check.
+     */
+    private function toggleClientCheckInternal($user, $cnpj, $clientName, $classification, $isChecked): array
+    {
         if (!$cnpj || !$user) {
             return ['success' => false, 'message' => 'Invalid request'];
         }
@@ -189,30 +197,61 @@ class Dashboard
     /**
      * Get check history for date range (for chart).
      */
+    /**
+     * Get check history for date range (for chart).
+     * Returns stacked data by classification.
+     */
     public function getCheckHistory(): array
     {
         $user = auth()->user();
         $startDate = $this->getStartDate();
         $endDate = $this->getEndDate();
 
-        // Get daily counts
-        $dailyCounts = \Webkul\Core\Models\ClientWorkTracking::where('user_id', $user->id)
+        // Get daily counts by classification
+        $dailyData = \Webkul\Core\Models\ClientWorkTracking::where('user_id', $user->id)
             ->where('is_checked', true)
             ->whereBetween('checked_at', [$startDate, $endDate->endOfDay()])
-            ->selectRaw('DATE(checked_at) as date, COUNT(*) as count')
-            ->groupByRaw('DATE(checked_at)')
+            ->selectRaw('DATE(checked_at) as date, classification, COUNT(*) as count')
+            ->groupByRaw('DATE(checked_at), classification')
             ->orderBy('date')
-            ->get()
-            ->pluck('count', 'date')
-            ->toArray();
+            ->get();
 
-        // Fill in missing dates with 0
-        $allDates = [];
+        // Prepare structure
+        $dates = [];
         $current = $startDate->copy();
         while ($current <= $endDate) {
-            $dateStr = $current->format('Y-m-d');
-            $allDates[$dateStr] = $dailyCounts[$dateStr] ?? 0;
+            $dates[$current->format('Y-m-d')] = $current->format('d/m');
             $current->addDay();
+        }
+
+        $classifications = [
+            'ATIVO_FREQUENTE',
+            'ATIVO_REGULAR',
+            'RISCO_INATIVACAO',
+            'OPORTUNIDADE_RECUPERACAO',
+            'INATIVO_BAIXO_POTENCIAL',
+            'SEM_HISTORICO'
+        ];
+
+        // Initialize datasets
+        $datasets = [];
+        foreach ($classifications as $cls) {
+            $datasets[$cls] = array_fill_keys(array_keys($dates), 0);
+        }
+
+        // Fill data
+        foreach ($dailyData as $row) {
+            $date = $row->date;
+            $cls = $row->classification ?? 'SEM_HISTORICO';
+            if (isset($datasets[$cls][$date])) {
+                $datasets[$cls][$date] = (int) $row->count;
+            }
+        }
+
+        // Flatten for frontend
+        $formattedDatasets = [];
+        foreach ($datasets as $cls => $data) {
+            $formattedDatasets[$cls] = array_values($data);
         }
 
         // Get today's count
@@ -221,15 +260,11 @@ class Dashboard
             ->whereDate('checked_at', now()->toDateString())
             ->count();
 
-        // Get total for period
-        $totalPeriod = array_sum($allDates);
-
         return [
-            'daily_counts' => $allDates,
+            'labels' => array_values($dates),
+            'datasets' => $formattedDatasets,
             'today_count' => $todayCount,
-            'total_period' => $totalPeriod,
-            'labels' => array_keys($allDates),
-            'data' => array_values($allDates),
+            'total_period' => $dailyData->sum('count'),
         ];
     }
 
@@ -276,6 +311,9 @@ class Dashboard
         }
 
         try {
+            // 0. Auto-check client logic
+            $this->toggleClientCheckInternal($user, $cnpj, $razao, $classificacao, true);
+
             // 1. Create or find Organization
             $organizationRepo = app(\Webkul\Contact\Repositories\OrganizationRepository::class);
             $organization = $organizationRepo->findOneWhere(['name' => $razao]);
@@ -342,7 +380,7 @@ class Dashboard
                 'entity_type' => 'leads',
                 'title' => "Reativação - {$razao}",
                 'description' => $description,
-                'lead_value' => $valorTotal,
+                'lead_value' => $ticketMedio,
                 'status' => 1,
                 'user_id' => $user->id,
                 'person_id' => $person->id,

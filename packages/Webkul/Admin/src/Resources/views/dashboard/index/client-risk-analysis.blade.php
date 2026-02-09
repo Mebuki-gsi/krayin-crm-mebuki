@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script type="text/x-template" id="v-dashboard-client-risk-analysis-template">
-                                <!-- Shimmer -->
+                                    <!-- Shimmer -->
     <template v-if="isLoading">
         <div class="grid gap-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <div class="shimmer h-6 w-48"></div>
@@ -49,7 +49,7 @@
             <!-- Line Chart: Daily Contacts -->
             <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4"
                 v-if="checkHistory.labels && checkHistory.labels.length > 0">
-                <h3 class="text-sm font-medium text-gray-800 dark:text-white mb-3">📈 Contatos Realizados por Dia</h3>
+                <h3 class="text-sm font-medium text-gray-800 dark:text-white mb-3">📊 Evolução de Contatos (Detalhado)</h3>
                 <div class="relative h-48">
                     <canvas ref="lineChart"></canvas>
                 </div>
@@ -71,40 +71,40 @@
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4" v-if="report.summary">
                 <!-- Ativo Frequente - Green -->
                 <div @click="toggleFilter('ATIVO_FREQUENTE')" :class="[
-                                                'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                activeFilter === 'ATIVO_FREQUENTE' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                'bg-green-500 dark:bg-green-600 text-white border-green-600'
-                                            ]" :title="getTooltip('ATIVO_FREQUENTE')">
+                                                    'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                                                    activeFilter === 'ATIVO_FREQUENTE' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                                                    'bg-green-500 dark:bg-green-600 text-white border-green-600'
+                                                ]" :title="getTooltip('ATIVO_FREQUENTE')">
                     <p class="text-2xl font-bold">@{{ report.summary.ATIVO_FREQUENTE || 0 }}</p>
                     <p class="text-xs">Ativo Frequente</p>
                 </div>
 
                 <!-- Ativo Regular - Blue -->
                 <div @click="toggleFilter('ATIVO_REGULAR')" :class="[
-                                                'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                activeFilter === 'ATIVO_REGULAR' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
-                                            ]" :title="getTooltip('ATIVO_REGULAR')">
+                                                    'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                                                    activeFilter === 'ATIVO_REGULAR' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                                                    'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
+                                                ]" :title="getTooltip('ATIVO_REGULAR')">
                     <p class="text-2xl font-bold">@{{ report.summary.ATIVO_REGULAR || 0 }}</p>
                     <p class="text-xs">Ativo Regular</p>
                 </div>
 
                 <!-- Risco Inativação - Yellow/Orange with WHITE text -->
                 <div @click="toggleFilter('RISCO_INATIVACAO')" :class="[
-                                                'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                activeFilter === 'RISCO_INATIVACAO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                'bg-orange-500 dark:bg-orange-600 text-white border-orange-600'
-                                            ]" :title="getTooltip('RISCO_INATIVACAO')">
+                                                    'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                                                    activeFilter === 'RISCO_INATIVACAO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                                                    'bg-orange-500 dark:bg-orange-600 text-white border-orange-600'
+                                                ]" :title="getTooltip('RISCO_INATIVACAO')">
                     <p class="text-2xl font-bold">@{{ report.summary.RISCO_INATIVACAO || 0 }}</p>
                     <p class="text-xs">Risco Inativação</p>
                 </div>
 
                 <!-- Sem Histórico - Gray with BLACK text -->
                 <div @click="toggleFilter('SEM_HISTORICO')" :class="[
-                                                'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                activeFilter === 'SEM_HISTORICO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                'bg-gray-200 dark:bg-gray-400 text-gray-900 border-gray-400'
-                                            ]" :title="getTooltip('SEM_HISTORICO')">
+                                                    'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                                                    activeFilter === 'SEM_HISTORICO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                                                    'bg-gray-200 dark:bg-gray-400 text-gray-900 border-gray-400'
+                                                ]" :title="getTooltip('SEM_HISTORICO')">
                     <p class="text-2xl font-bold">@{{ report.summary.SEM_HISTORICO || 0 }}</p>
                     <p class="text-xs">Sem Histórico</p>
                 </div>
@@ -115,27 +115,27 @@
                 <!-- Check Status Filter -->
                 <div class="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
                     <button @click="checkFilter = 'all'" :class="[
-                                                    'px-3 py-1.5 text-xs transition-colors',
-                                                    checkFilter === 'all' 
-                                                        ? 'bg-blue-600 text-white' 
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                ]">
+                                                        'px-3 py-1.5 text-xs transition-colors',
+                                                        checkFilter === 'all' 
+                                                            ? 'bg-blue-600 text-white' 
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                    ]">
                         Todos
                     </button>
                     <button @click="checkFilter = 'unchecked'" :class="[
-                                                    'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
-                                                    checkFilter === 'unchecked' 
-                                                        ? 'bg-orange-500 text-white' 
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                ]">
+                                                        'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
+                                                        checkFilter === 'unchecked' 
+                                                            ? 'bg-orange-500 text-white' 
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                    ]">
                         📋 Pendentes
                     </button>
                     <button @click="checkFilter = 'checked'" :class="[
-                                                    'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
-                                                    checkFilter === 'checked' 
-                                                        ? 'bg-green-600 text-white' 
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                ]">
+                                                        'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
+                                                        checkFilter === 'checked' 
+                                                            ? 'bg-green-600 text-white' 
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                    ]">
                         ✅ Trabalhados
                     </button>
                 </div>
@@ -187,8 +187,8 @@
                     </thead>
                     <tbody>
                         <tr v-for="(client, index) in paginatedClients" :key="client.cnpj" :class="[
-                                                        'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
-                                                    ]">
+                                                            'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+                                                        ]">
                             <td class="p-2">
                                 <input type="checkbox" :checked="checkedClients[client.cnpj]" @change="toggleClient(client)"
                                     class="rounded">
@@ -332,16 +332,16 @@
                         <p class="text-xs text-purple-600/70 dark:text-purple-300">Ticket Médio</p>
                     </div>
                     <div :class="[
-                                                    'rounded-lg p-3 text-center',
-                                                    selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
-                                                    selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
-                                                    'bg-green-50 dark:bg-green-900/30'
-                                                ]">
+                                                        'rounded-lg p-3 text-center',
+                                                        selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
+                                                        selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
+                                                        'bg-green-50 dark:bg-green-900/30'
+                                                    ]">
                         <p :class="[
-                                                        'text-2xl font-bold',
-                                                        selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
-                                                        selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
-                                                    ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
+                                                            'text-2xl font-bold',
+                                                            selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
+                                                            selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
+                                                        ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
                         <p class="text-xs text-gray-600 dark:text-gray-300">Dias s/ Compra</p>
                     </div>
                 </div>
@@ -378,7 +378,7 @@
                     perPage: 10,
                     checkedClients: {},
                     selectedClient: null,
-                    lineChart: null,
+                    chartInstance: null,
                     currentFilters: {},
                 }
 
@@ -495,55 +495,82 @@
 
                     this.$axios.get("{{ route('admin.dashboard.stats') }}", { params })
                         .then(response => {
-                            this.checkHistory = response.data.statistics || { labels: [], data: [], today_count: 0, total_period: 0 };
-                            this.$nextTick(() => this.renderLineChart());
+                            this.checkHistory = response.data.statistics || { labels: [], datasets: {}, today_count: 0, total_period: 0 };
+                            this.$nextTick(() => this.renderChart());
                         })
                         .catch(error => console.error('Load check history error:', error));
                 },
 
 
-                renderLineChart() {
+                renderChart() {
                     const canvas = this.$refs.lineChart;
                     if (!canvas || !this.checkHistory.labels || this.checkHistory.labels.length === 0) return;
 
-                    if (this.lineChart) {
-                        this.lineChart.destroy();
+                    if (this.chartInstance) {
+                        this.chartInstance.destroy();
                     }
 
                     const ctx = canvas.getContext('2d');
                     const isDark = document.documentElement.classList.contains('dark');
 
-                    this.lineChart = new Chart(ctx, {
-                        type: 'line',
+                    const colors = {
+                        'ATIVO_FREQUENTE': '#10B981',
+                        'ATIVO_REGULAR': '#3B82F6',
+                        'RISCO_INATIVACAO': '#F97316',
+                        'OPORTUNIDADE_RECUPERACAO': '#A855F7',
+                        'INATIVO_BAIXO_POTENCIAL': '#6B7280',
+                        'SEM_HISTORICO': '#9CA3AF'
+                    };
+
+                    const datasets = [];
+                    if (this.checkHistory.datasets) {
+                        for (const [key, data] of Object.entries(this.checkHistory.datasets)) {
+                            datasets.push({
+                                label: this.getLabel(key),
+                                data: data,
+                                backgroundColor: colors[key] || '#cccccc',
+                                borderRadius: 4,
+                            });
+                        }
+                    } else if (this.checkHistory.data) {
+                        datasets.push({
+                            label: 'Contatos',
+                            data: this.checkHistory.data,
+                            backgroundColor: '#3B82F6'
+                        });
+                    }
+
+                    this.chartInstance = new Chart(ctx, {
+                        type: 'bar',
                         data: {
-                            labels: this.checkHistory.labels.map(d => {
-                                const date = new Date(d);
-                                return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                            }),
-                            datasets: [{
-                                label: 'Contatos',
-                                data: this.checkHistory.data,
-                                borderColor: '#3B82F6',
-                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                borderWidth: 2,
-                                fill: true,
-                                tension: 0.3,
-                                pointRadius: 4,
-                                pointBackgroundColor: '#3B82F6',
-                            }]
+                            labels: this.checkHistory.labels,
+                            datasets: datasets
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
-                                legend: { display: false }
+                                legend: {
+                                    display: true,
+                                    position: 'bottom',
+                                    labels: {
+                                        color: isDark ? '#D1D5DB' : '#374151',
+                                        usePointStyle: true,
+                                    }
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                }
                             },
                             scales: {
                                 x: {
-                                    grid: { color: isDark ? '#374151' : '#E5E7EB' },
+                                    stacked: true,
+                                    grid: { display: false, color: isDark ? '#374151' : '#E5E7EB' },
                                     ticks: { color: isDark ? '#D1D5DB' : '#374151' }
                                 },
                                 y: {
+                                    stacked: true,
                                     beginAtZero: true,
                                     grid: { color: isDark ? '#374151' : '#E5E7EB' },
                                     ticks: {
