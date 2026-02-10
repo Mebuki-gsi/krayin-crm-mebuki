@@ -39,7 +39,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script type="text/x-template" id="v-dashboard-client-risk-analysis-template">
-                                            <!-- Shimmer -->
+                                                <!-- Shimmer -->
     <template v-if="isLoading">
         <div class="grid gap-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <div class="shimmer h-6 w-48"></div>
@@ -78,56 +78,58 @@
                 </div>
             </div>
 
-            <!-- Check Stats Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" v-if="checkHistory.today_count !== undefined">
-                <div class="rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 p-3 text-white">
-                    <p class="text-xs opacity-80">Contatos Realizados Hoje</p>
-                    <p class="text-2xl font-bold">@{{ checkHistory.today_count }}</p>
+            <!-- All Stats Cards - Unified Grid -->
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" v-if="report.summary">
+                <!-- Contatos Realizados Hoje -->
+                <div
+                    class="rounded-lg p-3 text-center border-2 bg-emerald-500 dark:bg-emerald-600 text-white border-emerald-600">
+                    <p class="text-2xl font-bold">@{{ checkHistory.today_count || 0 }}</p>
+                    <p class="text-xs">Contatos Hoje</p>
                 </div>
-                <div class="rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 p-3 text-white">
-                    <p class="text-xs opacity-80">Total no Período</p>
-                    <p class="text-2xl font-bold">@{{ checkHistory.total_period }}</p>
-                </div>
-            </div>
 
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4" v-if="report.summary">
-                <!-- Ativo Frequente - Green -->
+                <!-- Total no Período -->
+                <div
+                    class="rounded-lg p-3 text-center border-2 bg-indigo-500 dark:bg-indigo-600 text-white border-indigo-600">
+                    <p class="text-2xl font-bold">@{{ checkHistory.total_period || 0 }}</p>
+                    <p class="text-xs">Total no Período</p>
+                </div>
+
+                <!-- Ativo Frequente -->
                 <div @click="toggleFilter('ATIVO_FREQUENTE')" :class="[
-                                                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                            activeFilter === 'ATIVO_FREQUENTE' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                            'bg-green-500 dark:bg-green-600 text-white border-green-600'
-                                                        ]" :title="getTooltip('ATIVO_FREQUENTE')">
+                        'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                        activeFilter === 'ATIVO_FREQUENTE' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                        'bg-green-500 dark:bg-green-600 text-white border-green-600'
+                    ]" :title="getTooltip('ATIVO_FREQUENTE')">
                     <p class="text-2xl font-bold">@{{ report.summary.ATIVO_FREQUENTE || 0 }}</p>
                     <p class="text-xs">Ativo Frequente</p>
                 </div>
 
-                <!-- Ativo Regular - Blue -->
+                <!-- Ativo Regular -->
                 <div @click="toggleFilter('ATIVO_REGULAR')" :class="[
-                                                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                            activeFilter === 'ATIVO_REGULAR' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                            'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
-                                                        ]" :title="getTooltip('ATIVO_REGULAR')">
+                        'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                        activeFilter === 'ATIVO_REGULAR' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                        'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
+                    ]" :title="getTooltip('ATIVO_REGULAR')">
                     <p class="text-2xl font-bold">@{{ report.summary.ATIVO_REGULAR || 0 }}</p>
                     <p class="text-xs">Ativo Regular</p>
                 </div>
 
-                <!-- Risco Inativação - Yellow/Orange with WHITE text -->
+                <!-- Risco Inativação -->
                 <div @click="toggleFilter('RISCO_INATIVACAO')" :class="[
-                                                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                            activeFilter === 'RISCO_INATIVACAO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                            'bg-orange-500 dark:bg-orange-600 text-white border-orange-600'
-                                                        ]" :title="getTooltip('RISCO_INATIVACAO')">
+                        'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                        activeFilter === 'RISCO_INATIVACAO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                        'bg-orange-500 dark:bg-orange-600 text-white border-orange-600'
+                    ]" :title="getTooltip('RISCO_INATIVACAO')">
                     <p class="text-2xl font-bold">@{{ report.summary.RISCO_INATIVACAO || 0 }}</p>
                     <p class="text-xs">Risco Inativação</p>
                 </div>
 
-                <!-- Sem Histórico - Gray with BLACK text -->
+                <!-- Sem Histórico -->
                 <div @click="toggleFilter('SEM_HISTORICO')" :class="[
-                                                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                            activeFilter === 'SEM_HISTORICO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                            'bg-gray-200 dark:bg-gray-400 text-gray-900 border-gray-400'
-                                                        ]" :title="getTooltip('SEM_HISTORICO')">
+                        'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                        activeFilter === 'SEM_HISTORICO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                        'bg-gray-200 dark:bg-gray-400 text-gray-900 border-gray-400'
+                    ]" :title="getTooltip('SEM_HISTORICO')">
                     <p class="text-2xl font-bold">@{{ report.summary.SEM_HISTORICO || 0 }}</p>
                     <p class="text-xs">Sem Histórico</p>
                 </div>
@@ -138,27 +140,27 @@
                 <!-- Check Status Filter -->
                 <div class="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
                     <button @click="checkFilter = 'all'" :class="[
-                                                                'px-3 py-1.5 text-xs transition-colors',
-                                                                checkFilter === 'all' 
-                                                                    ? 'bg-blue-600 text-white' 
-                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                            ]">
+                                                                    'px-3 py-1.5 text-xs transition-colors',
+                                                                    checkFilter === 'all' 
+                                                                        ? 'bg-blue-600 text-white' 
+                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                ]">
                         Todos
                     </button>
                     <button @click="checkFilter = 'unchecked'" :class="[
-                                                                'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
-                                                                checkFilter === 'unchecked' 
-                                                                    ? 'bg-orange-500 text-white' 
-                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                            ]">
+                                                                    'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
+                                                                    checkFilter === 'unchecked' 
+                                                                        ? 'bg-orange-500 text-white' 
+                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                ]">
                         📋 Pendentes
                     </button>
                     <button @click="checkFilter = 'checked'" :class="[
-                                                                'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
-                                                                checkFilter === 'checked' 
-                                                                    ? 'bg-green-600 text-white' 
-                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                            ]">
+                                                                    'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
+                                                                    checkFilter === 'checked' 
+                                                                        ? 'bg-green-600 text-white' 
+                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                ]">
                         ✅ Trabalhados
                     </button>
                 </div>
@@ -234,8 +236,8 @@
                     </thead>
                     <tbody>
                         <tr v-for="(client, index) in paginatedClients" :key="client.cnpj" :class="[
-                                    'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
-                                ]">
+                                        'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+                                    ]">
                             <td class="p-2">
                                 <input type="checkbox" :checked="checkedClients[client.cnpj]" @change="toggleClient(client)"
                                     class="rounded">
@@ -385,16 +387,16 @@
                         <p class="text-xs text-purple-600/70 dark:text-purple-300">Ticket Médio</p>
                     </div>
                     <div :class="[
-                                                                'rounded-lg p-3 text-center',
-                                                                selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
-                                                                selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
-                                                                'bg-green-50 dark:bg-green-900/30'
-                                                            ]">
+                                                                    'rounded-lg p-3 text-center',
+                                                                    selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
+                                                                    selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
+                                                                    'bg-green-50 dark:bg-green-900/30'
+                                                                ]">
                         <p :class="[
-                                                                    'text-2xl font-bold',
-                                                                    selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
-                                                                    selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
-                                                                ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
+                                                                        'text-2xl font-bold',
+                                                                        selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
+                                                                        selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
+                                                                    ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
                         <p class="text-xs text-gray-600 dark:text-gray-300">Dias s/ Compra</p>
                     </div>
                 </div>
