@@ -12,11 +12,34 @@
 {!! view_render_event('admin.dashboard.index.client_risk_analysis.after') !!}
 
 @pushOnce('scripts')
+    <!-- Resize Handle Styles -->
+    <style>
+        .resizable-th {
+            position: relative;
+        }
+
+        .resize-handle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            cursor: col-resize;
+            background: transparent;
+            transition: background 0.15s;
+            z-index: 1;
+        }
+
+        .resize-handle:hover,
+        .resize-handle:active {
+            background: #3B82F6;
+        }
+    </style>
     <!-- Chart.js for Line Chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script type="text/x-template" id="v-dashboard-client-risk-analysis-template">
-                                    <!-- Shimmer -->
+                                            <!-- Shimmer -->
     <template v-if="isLoading">
         <div class="grid gap-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <div class="shimmer h-6 w-48"></div>
@@ -71,40 +94,40 @@
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4" v-if="report.summary">
                 <!-- Ativo Frequente - Green -->
                 <div @click="toggleFilter('ATIVO_FREQUENTE')" :class="[
-                                                    'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                    activeFilter === 'ATIVO_FREQUENTE' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                    'bg-green-500 dark:bg-green-600 text-white border-green-600'
-                                                ]" :title="getTooltip('ATIVO_FREQUENTE')">
+                                                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                                                            activeFilter === 'ATIVO_FREQUENTE' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                                                            'bg-green-500 dark:bg-green-600 text-white border-green-600'
+                                                        ]" :title="getTooltip('ATIVO_FREQUENTE')">
                     <p class="text-2xl font-bold">@{{ report.summary.ATIVO_FREQUENTE || 0 }}</p>
                     <p class="text-xs">Ativo Frequente</p>
                 </div>
 
                 <!-- Ativo Regular - Blue -->
                 <div @click="toggleFilter('ATIVO_REGULAR')" :class="[
-                                                    'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                    activeFilter === 'ATIVO_REGULAR' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                    'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
-                                                ]" :title="getTooltip('ATIVO_REGULAR')">
+                                                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                                                            activeFilter === 'ATIVO_REGULAR' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                                                            'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
+                                                        ]" :title="getTooltip('ATIVO_REGULAR')">
                     <p class="text-2xl font-bold">@{{ report.summary.ATIVO_REGULAR || 0 }}</p>
                     <p class="text-xs">Ativo Regular</p>
                 </div>
 
                 <!-- Risco Inativação - Yellow/Orange with WHITE text -->
                 <div @click="toggleFilter('RISCO_INATIVACAO')" :class="[
-                                                    'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                    activeFilter === 'RISCO_INATIVACAO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                    'bg-orange-500 dark:bg-orange-600 text-white border-orange-600'
-                                                ]" :title="getTooltip('RISCO_INATIVACAO')">
+                                                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                                                            activeFilter === 'RISCO_INATIVACAO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                                                            'bg-orange-500 dark:bg-orange-600 text-white border-orange-600'
+                                                        ]" :title="getTooltip('RISCO_INATIVACAO')">
                     <p class="text-2xl font-bold">@{{ report.summary.RISCO_INATIVACAO || 0 }}</p>
                     <p class="text-xs">Risco Inativação</p>
                 </div>
 
                 <!-- Sem Histórico - Gray with BLACK text -->
                 <div @click="toggleFilter('SEM_HISTORICO')" :class="[
-                                                    'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                                                    activeFilter === 'SEM_HISTORICO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                                                    'bg-gray-200 dark:bg-gray-400 text-gray-900 border-gray-400'
-                                                ]" :title="getTooltip('SEM_HISTORICO')">
+                                                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                                                            activeFilter === 'SEM_HISTORICO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                                                            'bg-gray-200 dark:bg-gray-400 text-gray-900 border-gray-400'
+                                                        ]" :title="getTooltip('SEM_HISTORICO')">
                     <p class="text-2xl font-bold">@{{ report.summary.SEM_HISTORICO || 0 }}</p>
                     <p class="text-xs">Sem Histórico</p>
                 </div>
@@ -115,27 +138,27 @@
                 <!-- Check Status Filter -->
                 <div class="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
                     <button @click="checkFilter = 'all'" :class="[
-                                                        'px-3 py-1.5 text-xs transition-colors',
-                                                        checkFilter === 'all' 
-                                                            ? 'bg-blue-600 text-white' 
-                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                    ]">
+                                                                'px-3 py-1.5 text-xs transition-colors',
+                                                                checkFilter === 'all' 
+                                                                    ? 'bg-blue-600 text-white' 
+                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                            ]">
                         Todos
                     </button>
                     <button @click="checkFilter = 'unchecked'" :class="[
-                                                        'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
-                                                        checkFilter === 'unchecked' 
-                                                            ? 'bg-orange-500 text-white' 
-                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                    ]">
+                                                                'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
+                                                                checkFilter === 'unchecked' 
+                                                                    ? 'bg-orange-500 text-white' 
+                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                            ]">
                         📋 Pendentes
                     </button>
                     <button @click="checkFilter = 'checked'" :class="[
-                                                        'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
-                                                        checkFilter === 'checked' 
-                                                            ? 'bg-green-600 text-white' 
-                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                    ]">
+                                                                'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
+                                                                checkFilter === 'checked' 
+                                                                    ? 'bg-green-600 text-white' 
+                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                            ]">
                         ✅ Trabalhados
                     </button>
                 </div>
@@ -157,56 +180,79 @@
             </div>
 
             <!-- Client Table -->
-            <div class="overflow-x-auto" v-if="filteredClients.length > 0">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-gray-100 dark:bg-gray-800">
+            <div class="overflow-x-auto" v-if="filteredClients.length > 0" ref="tableContainer">
+                <table class="w-full text-sm border-collapse" ref="clientTable">
+                    <thead class="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
                         <tr>
-                            <th class="p-2 text-left w-10 text-gray-700 dark:text-white">
+                            <th class="p-2 text-left text-gray-700 dark:text-white" style="width: 40px; min-width: 40px;">
                                 <input type="checkbox" @change="toggleAllChecked" :checked="allChecked" class="rounded">
                             </th>
-                            <th class="p-2 text-left cursor-pointer text-gray-700 dark:text-white"
-                                @click="setSortBy('razao')">
-                                Cliente
-                                <span v-if="sortBy === 'razao'">↑</span>
+                            <th class="p-2 text-left cursor-pointer text-gray-700 dark:text-white select-none group resizable-th"
+                                @click="setSortBy('razao')" style="min-width: 180px;">
+                                <div class="flex items-center gap-1">
+                                    Cliente
+                                    <span class="text-blue-500" v-if="sortBy === 'razao'">▲</span>
+                                    <span class="text-gray-300 dark:text-gray-600 group-hover:text-gray-400" v-else>⇅</span>
+                                </div>
+                                <div class="resize-handle" @mousedown.stop="startResize($event, 1)"></div>
                             </th>
-                            <th class="p-2 text-right cursor-pointer text-gray-700 dark:text-white"
-                                @click="setSortBy('valor_total')">
-                                Total
-                                <span v-if="sortBy === 'valor_total'">↓</span>
-                                <span v-if="sortBy === 'valor_total_asc'">↑</span>
+                            <th class="p-2 text-left cursor-pointer text-gray-700 dark:text-white select-none group resizable-th"
+                                @click="setSortBy('cnpj_col')" style="min-width: 120px;">
+                                <div class="flex items-center gap-1">
+                                    CNPJ
+                                    <span class="text-blue-500" v-if="sortBy === 'cnpj_col'">▲</span>
+                                    <span class="text-gray-300 dark:text-gray-600 group-hover:text-gray-400" v-else>⇅</span>
+                                </div>
+                                <div class="resize-handle" @mousedown.stop="startResize($event, 2)"></div>
                             </th>
-                            <th class="p-2 text-center cursor-pointer text-gray-700 dark:text-white"
-                                @click="setSortBy('dias_sem_compra')">
-                                Dias s/ Compra
-                                <span v-if="sortBy === 'dias_sem_compra'">↓</span>
-                                <span v-if="sortBy === 'dias_sem_compra_asc'">↑</span>
+                            <th class="p-2 text-right cursor-pointer text-gray-700 dark:text-white select-none group resizable-th"
+                                @click="setSortBy('valor_total')" style="min-width: 110px;">
+                                <div class="flex items-center justify-end gap-1">
+                                    Total
+                                    <span class="text-blue-500" v-if="sortBy === 'valor_total'">▼</span>
+                                    <span class="text-blue-500" v-else-if="sortBy === 'valor_total_asc'">▲</span>
+                                    <span class="text-gray-300 dark:text-gray-600 group-hover:text-gray-400" v-else>⇅</span>
+                                </div>
+                                <div class="resize-handle" @mousedown.stop="startResize($event, 3)"></div>
                             </th>
-                            <th class="p-2 text-center text-gray-700 dark:text-white">Status</th>
-                            <th class="p-2 text-center text-gray-700 dark:text-white">Ações</th>
+                            <th class="p-2 text-center cursor-pointer text-gray-700 dark:text-white select-none group resizable-th"
+                                @click="setSortBy('dias_sem_compra')" style="min-width: 120px;">
+                                <div class="flex items-center justify-center gap-1">
+                                    Dias s/ Compra
+                                    <span class="text-blue-500" v-if="sortBy === 'dias_sem_compra'">▼</span>
+                                    <span class="text-blue-500" v-else-if="sortBy === 'dias_sem_compra_asc'">▲</span>
+                                    <span class="text-gray-300 dark:text-gray-600 group-hover:text-gray-400" v-else>⇅</span>
+                                </div>
+                                <div class="resize-handle" @mousedown.stop="startResize($event, 4)"></div>
+                            </th>
+                            <th class="p-2 text-center text-gray-700 dark:text-white resizable-th" style="min-width: 90px;">
+                                Status
+                                <div class="resize-handle" @mousedown.stop="startResize($event, 5)"></div>
+                            </th>
+                            <th class="p-2 text-center text-gray-700 dark:text-white" style="min-width: 120px;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(client, index) in paginatedClients" :key="client.cnpj" :class="[
-                                                            'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
-                                                        ]">
+                                    'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+                                ]">
                             <td class="p-2">
                                 <input type="checkbox" :checked="checkedClients[client.cnpj]" @change="toggleClient(client)"
                                     class="rounded">
                             </td>
                             <td class="p-2">
                                 <div class="flex items-center gap-1">
-                                    <span v-if="checkedClients[client.cnpj]" class="text-green-500 text-lg"
+                                    <span v-if="checkedClients[client.cnpj]" class="text-green-500 text-lg flex-shrink-0"
                                         title="Cliente já contatado">✅</span>
-                                    <div>
-                                        <div class="font-medium text-gray-900 dark:text-white truncate max-w-[200px]"
-                                            :title="client.razao">
-                                            @{{ client.razao || 'N/A' }}
-                                        </div>
-                                        <div class="text-xs text-gray-400 dark:text-gray-200">@{{ client.cnpj }}</div>
+                                    <div class="font-medium text-gray-900 dark:text-white" :title="client.razao">
+                                        @{{ client.razao || 'N/A' }}
                                     </div>
                                 </div>
                             </td>
-                            <td class="p-2 text-right font-medium text-gray-900 dark:text-white">
+                            <td class="p-2 text-gray-500 dark:text-gray-300 font-mono text-xs">
+                                @{{ client.cnpj }}
+                            </td>
+                            <td class="p-2 text-right font-medium text-gray-900 dark:text-white whitespace-nowrap">
                                 R$ @{{ formatCurrency(client.valor_total) }}
                             </td>
                             <td class="p-2 text-center">
@@ -216,20 +262,18 @@
                             </td>
                             <td class="p-2 text-center">
                                 <span :class="getStatusBadge(client.classificacao_risco)"
-                                    class="rounded-full px-2 py-0.5 text-xs font-medium cursor-help"
+                                    class="rounded-full px-2 py-0.5 text-xs font-medium cursor-help whitespace-nowrap"
                                     :title="getTooltip(client.classificacao_risco)">
                                     @{{ getShortLabel(client.classificacao_risco) }}
                                 </span>
                             </td>
                             <td class="p-2 text-center">
                                 <div class="flex justify-center gap-1">
-                                    <!-- Create Lead Button -->
                                     <button @click="createLead(client)"
                                         class="rounded px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-1"
                                         title="Criar Lead no Kanban">
                                         <span>➕</span> Lead
                                     </button>
-                                    <!-- View Details Button -->
                                     <button @click="openModal(client)"
                                         class="rounded p-1 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                         title="Ver Detalhes">
@@ -243,9 +287,18 @@
 
                 <!-- Pagination -->
                 <div class="flex items-center justify-between mt-4 px-2">
-                    <p class="text-xs text-gray-600 dark:text-white">
-                        Mostrando @{{ paginationStart }} - @{{ paginationEnd }} de @{{ filteredClients.length }} clientes
-                    </p>
+                    <div class="flex items-center gap-3">
+                        <p class="text-xs text-gray-600 dark:text-white">
+                            Mostrando @{{ paginationStart }} - @{{ paginationEnd }} de @{{ filteredClients.length }}
+                        </p>
+                        <select v-model.number="perPage" @change="currentPage = 1"
+                            class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white px-1.5 py-0.5 text-xs">
+                            <option :value="10">10 por pág</option>
+                            <option :value="25">25 por pág</option>
+                            <option :value="50">50 por pág</option>
+                            <option :value="100">100 por pág</option>
+                        </select>
+                    </div>
                     <div class="flex gap-1">
                         <button @click="currentPage--" :disabled="currentPage <= 1"
                             class="rounded px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white disabled:opacity-50">
@@ -332,16 +385,16 @@
                         <p class="text-xs text-purple-600/70 dark:text-purple-300">Ticket Médio</p>
                     </div>
                     <div :class="[
-                                                        'rounded-lg p-3 text-center',
-                                                        selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
-                                                        selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
-                                                        'bg-green-50 dark:bg-green-900/30'
-                                                    ]">
+                                                                'rounded-lg p-3 text-center',
+                                                                selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
+                                                                selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
+                                                                'bg-green-50 dark:bg-green-900/30'
+                                                            ]">
                         <p :class="[
-                                                            'text-2xl font-bold',
-                                                            selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
-                                                            selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
-                                                        ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
+                                                                    'text-2xl font-bold',
+                                                                    selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
+                                                                    selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
+                                                                ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
                         <p class="text-xs text-gray-600 dark:text-gray-300">Dias s/ Compra</p>
                     </div>
                 </div>
@@ -380,6 +433,7 @@
                     selectedClient: null,
                     chartInstance: null,
                     currentFilters: {},
+                    resizing: null,
                 }
 
             },
@@ -410,6 +464,8 @@
                                 return (a.dias_sem_compra || 0) - (b.dias_sem_compra || 0);
                             case 'razao':
                                 return (a.razao || '').localeCompare(b.razao || '');
+                            case 'cnpj_col':
+                                return (a.cnpj || '').localeCompare(b.cnpj || '');
                             default:
                                 return (b.valor_total || 0) - (a.valor_total || 0);
                         }
@@ -596,6 +652,10 @@
                 },
 
                 setSortBy(column) {
+                    if (column === 'cnpj_col') {
+                        this.sortBy = 'cnpj_col';
+                        return;
+                    }
                     if (this.sortBy === column) {
                         this.sortBy = column + '_asc';
                     } else if (this.sortBy === column + '_asc') {
@@ -603,6 +663,30 @@
                     } else {
                         this.sortBy = column;
                     }
+                },
+
+                startResize(event, colIndex) {
+                    const th = event.target.parentElement;
+                    const startX = event.pageX;
+                    const startWidth = th.offsetWidth;
+                    document.body.style.cursor = 'col-resize';
+                    document.body.style.userSelect = 'none';
+
+                    const onMouseMove = (e) => {
+                        const diff = e.pageX - startX;
+                        const newWidth = Math.max(60, startWidth + diff);
+                        th.style.width = newWidth + 'px';
+                    };
+
+                    const onMouseUp = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                    };
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
                 },
 
                 toggleClient(client) {
