@@ -368,12 +368,20 @@ class Dashboard
             $description .= "⚠️ **Status:** {$classificacao}\n";
             $description .= "\n---\n_Lead criado automaticamente via Análise de Risco de Carteira_";
 
-            // 4. Get default pipeline and first stage
+            // 5. Resolve lead source and type
+            $sourceModel = \Webkul\Lead\Models\Source::firstOrCreate(
+                ['name' => 'Carteira Ativa']
+            );
+            $typeModel = \Webkul\Lead\Models\Type::firstOrCreate(
+                ['name' => 'Negócio Existente']
+            );
+
+            // 6. Get default pipeline and first stage
             $pipelineRepo = app(\Webkul\Lead\Repositories\PipelineRepository::class);
             $pipeline = $pipelineRepo->getDefaultPipeline();
             $stage = $pipeline->stages()->first();
 
-            // 5. Create Lead
+            // 7. Create Lead
             $leadRepo = app(\Webkul\Lead\Repositories\LeadRepository::class);
 
             $lead = $leadRepo->create([
@@ -386,6 +394,8 @@ class Dashboard
                 'person_id' => $person->id,
                 'lead_pipeline_id' => $pipeline->id,
                 'lead_pipeline_stage_id' => $stage->id,
+                'lead_source_id' => $sourceModel->id,
+                'lead_type_id' => $typeModel->id,
             ]);
 
 

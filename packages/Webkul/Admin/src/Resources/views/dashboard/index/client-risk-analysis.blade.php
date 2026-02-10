@@ -39,7 +39,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script type="text/x-template" id="v-dashboard-client-risk-analysis-template">
-                                                <!-- Shimmer -->
+                                                    <!-- Shimmer -->
     <template v-if="isLoading">
         <div class="grid gap-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
             <div class="shimmer h-6 w-48"></div>
@@ -96,40 +96,40 @@
 
                 <!-- Ativo Frequente -->
                 <div @click="toggleFilter('ATIVO_FREQUENTE')" :class="[
-                        'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                        activeFilter === 'ATIVO_FREQUENTE' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                        'bg-green-500 dark:bg-green-600 text-white border-green-600'
-                    ]" :title="getTooltip('ATIVO_FREQUENTE')">
+                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                            activeFilter === 'ATIVO_FREQUENTE' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                            'bg-green-500 dark:bg-green-600 text-white border-green-600'
+                        ]" :title="getTooltip('ATIVO_FREQUENTE')">
                     <p class="text-2xl font-bold">@{{ report.summary.ATIVO_FREQUENTE || 0 }}</p>
                     <p class="text-xs">Ativo Frequente</p>
                 </div>
 
                 <!-- Ativo Regular -->
                 <div @click="toggleFilter('ATIVO_REGULAR')" :class="[
-                        'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                        activeFilter === 'ATIVO_REGULAR' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                        'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
-                    ]" :title="getTooltip('ATIVO_REGULAR')">
+                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                            activeFilter === 'ATIVO_REGULAR' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                            'bg-blue-500 dark:bg-blue-600 text-white border-blue-600'
+                        ]" :title="getTooltip('ATIVO_REGULAR')">
                     <p class="text-2xl font-bold">@{{ report.summary.ATIVO_REGULAR || 0 }}</p>
                     <p class="text-xs">Ativo Regular</p>
                 </div>
 
                 <!-- Risco Inativação -->
                 <div @click="toggleFilter('RISCO_INATIVACAO')" :class="[
-                        'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                        activeFilter === 'RISCO_INATIVACAO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                        'bg-orange-500 dark:bg-orange-600 text-white border-orange-600'
-                    ]" :title="getTooltip('RISCO_INATIVACAO')">
+                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                            activeFilter === 'RISCO_INATIVACAO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                            'bg-orange-500 dark:bg-orange-600 text-white border-orange-600'
+                        ]" :title="getTooltip('RISCO_INATIVACAO')">
                     <p class="text-2xl font-bold">@{{ report.summary.RISCO_INATIVACAO || 0 }}</p>
                     <p class="text-xs">Risco Inativação</p>
                 </div>
 
                 <!-- Sem Histórico -->
                 <div @click="toggleFilter('SEM_HISTORICO')" :class="[
-                        'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
-                        activeFilter === 'SEM_HISTORICO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
-                        'bg-gray-200 dark:bg-gray-400 text-gray-900 border-gray-400'
-                    ]" :title="getTooltip('SEM_HISTORICO')">
+                            'cursor-pointer rounded-lg p-3 text-center transition-all border-2',
+                            activeFilter === 'SEM_HISTORICO' ? 'ring-2 ring-offset-2 ring-blue-500' : '',
+                            'bg-gray-200 dark:bg-gray-400 text-gray-900 border-gray-400'
+                        ]" :title="getTooltip('SEM_HISTORICO')">
                     <p class="text-2xl font-bold">@{{ report.summary.SEM_HISTORICO || 0 }}</p>
                     <p class="text-xs">Sem Histórico</p>
                 </div>
@@ -140,27 +140,27 @@
                 <!-- Check Status Filter -->
                 <div class="flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
                     <button @click="checkFilter = 'all'" :class="[
-                                                                    'px-3 py-1.5 text-xs transition-colors',
-                                                                    checkFilter === 'all' 
-                                                                        ? 'bg-blue-600 text-white' 
-                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                                ]">
+                                                                        'px-3 py-1.5 text-xs transition-colors',
+                                                                        checkFilter === 'all' 
+                                                                            ? 'bg-blue-600 text-white' 
+                                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                    ]">
                         Todos
                     </button>
                     <button @click="checkFilter = 'unchecked'" :class="[
-                                                                    'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
-                                                                    checkFilter === 'unchecked' 
-                                                                        ? 'bg-orange-500 text-white' 
-                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                                ]">
+                                                                        'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
+                                                                        checkFilter === 'unchecked' 
+                                                                            ? 'bg-orange-500 text-white' 
+                                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                    ]">
                         📋 Pendentes
                     </button>
                     <button @click="checkFilter = 'checked'" :class="[
-                                                                    'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
-                                                                    checkFilter === 'checked' 
-                                                                        ? 'bg-green-600 text-white' 
-                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                                ]">
+                                                                        'px-3 py-1.5 text-xs transition-colors border-l border-gray-300 dark:border-gray-600',
+                                                                        checkFilter === 'checked' 
+                                                                            ? 'bg-green-600 text-white' 
+                                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                    ]">
                         ✅ Trabalhados
                     </button>
                 </div>
@@ -236,8 +236,8 @@
                     </thead>
                     <tbody>
                         <tr v-for="(client, index) in paginatedClients" :key="client.cnpj" :class="[
-                                        'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
-                                    ]">
+                                            'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+                                        ]">
                             <td class="p-2">
                                 <input type="checkbox" :checked="checkedClients[client.cnpj]" @change="toggleClient(client)"
                                     class="rounded">
@@ -387,16 +387,16 @@
                         <p class="text-xs text-purple-600/70 dark:text-purple-300">Ticket Médio</p>
                     </div>
                     <div :class="[
-                                                                    'rounded-lg p-3 text-center',
-                                                                    selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
-                                                                    selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
-                                                                    'bg-green-50 dark:bg-green-900/30'
-                                                                ]">
+                                                                        'rounded-lg p-3 text-center',
+                                                                        selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
+                                                                        selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
+                                                                        'bg-green-50 dark:bg-green-900/30'
+                                                                    ]">
                         <p :class="[
-                                                                        'text-2xl font-bold',
-                                                                        selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
-                                                                        selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
-                                                                    ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
+                                                                            'text-2xl font-bold',
+                                                                            selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
+                                                                            selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
+                                                                        ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
                         <p class="text-xs text-gray-600 dark:text-gray-300">Dias s/ Compra</p>
                     </div>
                 </div>
@@ -498,17 +498,20 @@
             },
 
             mounted() {
-                this.getStats({});
                 this.loadCheckedClients();
-                this.loadCheckHistory();
                 this.$emitter.on('reporting-filter-updated', this.onFilterUpdated);
+                // Chain: getStats first (sets isLoading=false), then loadCheckHistory (renders chart)
+                this.getStats({}).then(() => {
+                    this.loadCheckHistory();
+                });
             },
 
             methods: {
                 onFilterUpdated(filters) {
                     this.currentFilters = filters;
-                    this.getStats(filters);
-                    this.loadCheckHistory(filters);
+                    this.getStats(filters).then(() => {
+                        this.loadCheckHistory(filters);
+                    });
                 },
 
                 getStats(filters) {
@@ -516,7 +519,7 @@
                     var params = Object.assign({}, filters);
                     params.type = 'client-risk-analysis';
 
-                    this.$axios.get("{{ route('admin.dashboard.stats') }}", { params })
+                    return this.$axios.get("{{ route('admin.dashboard.stats') }}", { params })
                         .then(response => {
                             const stats = response.data.statistics || {};
                             this.report = {
@@ -551,18 +554,26 @@
                     var params = Object.assign({}, filters);
                     params.type = 'check-history';
 
-                    this.$axios.get("{{ route('admin.dashboard.stats') }}", { params })
+                    return this.$axios.get("{{ route('admin.dashboard.stats') }}", { params })
                         .then(response => {
                             this.checkHistory = response.data.statistics || { labels: [], datasets: {}, today_count: 0, total_period: 0 };
-                            this.$nextTick(() => this.renderChart());
+                            this.$nextTick(() => {
+                                this.$nextTick(() => this.renderChart());
+                            });
                         })
                         .catch(error => console.error('Load check history error:', error));
                 },
 
 
-                renderChart() {
+                renderChart(retries = 3) {
                     const canvas = this.$refs.lineChart;
-                    if (!canvas || !this.checkHistory.labels || this.checkHistory.labels.length === 0) return;
+                    if (!this.checkHistory.labels || this.checkHistory.labels.length === 0) return;
+                    if (!canvas) {
+                        if (retries > 0) {
+                            setTimeout(() => this.renderChart(retries - 1), 200);
+                        }
+                        return;
+                    }
 
                     if (this.chartInstance) {
                         this.chartInstance.destroy();
@@ -643,9 +654,27 @@
 
                 refreshData() {
                     this.isRefreshing = true;
-                    this.getStats({});
-                    this.loadCheckHistory();
-                    setTimeout(() => { this.isRefreshing = false; }, 1000);
+                    // Chain: first getStats (which toggles isLoading), then loadCheckHistory after DOM is stable
+                    this.$axios.get("{{ route('admin.dashboard.stats') }}", { params: { type: 'client-risk-analysis', ...this.currentFilters } })
+                        .then(response => {
+                            const stats = response.data.statistics || {};
+                            this.report = {
+                                clients: stats.clients || [],
+                                summary: stats.summary || {},
+                                total: stats.total || 0,
+                                ticket_threshold: stats.ticket_threshold || 0,
+                                last_updated: stats.last_updated || null
+                            };
+                            this.isLoading = false;
+                            this.isRefreshing = false;
+                            // Now load check history after DOM is stable (canvas is in DOM)
+                            this.$nextTick(() => this.loadCheckHistory(this.currentFilters));
+                        })
+                        .catch(error => {
+                            console.error('Refresh error:', error);
+                            this.isRefreshing = false;
+                            this.isLoading = false;
+                        });
                 },
 
                 toggleFilter(key) {
