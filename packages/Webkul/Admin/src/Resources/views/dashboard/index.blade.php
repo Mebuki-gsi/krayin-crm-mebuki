@@ -135,24 +135,24 @@
                                     @endif
 
                                     <x-admin::flat-picker.date
-                                        class="!w-[168px]"
+                                        class="!w-[170px]"
                                         ::allow-input="false"
                                         ::max-date="filters.end"
                                     >
                                         <input
-                                            class="flex min-h-[39px] w-full rounded-md border px-3 py-2 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
+                                            class="flex min-h-[39px] w-full rounded-md border pl-2 pr-10 py-2 text-sm text-center text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
                                             v-model="filters.start"
                                             placeholder="@lang('admin::app.dashboard.index.start-date')"
-                                        />
+                                         />
                                     </x-admin::flat-picker.date>
 
                                     <x-admin::flat-picker.date
-                                        class="!w-[168px]"
+                                        class="!w-[170px]"
                                         ::allow-input="false"
                                         ::max-date="filters.end"
                                     >
                                         <input
-                                            class="flex min-h-[39px] w-full rounded-md border px-3 py-2 text-sm text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
+                                            class="flex min-h-[39px] w-full rounded-md border pl-2 pr-10 py-2 text-sm text-center text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400"
                                             v-model="filters.end"
                                             placeholder="@lang('admin::app.dashboard.index.end-date')"
                                         />

@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: krayin-app
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    networks:
+      - krayin
+
+  mysql:
+    image: mariadb:10.11
+    container_name: krayin-mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: root_secret
+      MARIADB_DATABASE: krayin_crm
+      MARIADB_USER: krayin
+      MARIADB_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - krayin_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "krayin", "-psecret"]
+      interval: 5s
+      retries: 10
+    networks:
+      - krayin
+
+networks:
+  krayin:
+    driver: bridge
+
+volumes:
+  krayin_mysql:
+    driver: local

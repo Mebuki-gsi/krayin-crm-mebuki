@@ -33,3 +33,18 @@ node_modules/
 /test-results/
 /blob-report/
 /playwright/.cache/
+
+# Storage compiled views
+/storage/framework/views/*.php
+
+# Backup files
+*.sql
+*.sql.gz
+
+# Temporary test files
+*_test.php
+*_tmp.php
+
+# Documentation (local)
+/obsidian-vault/
+/docs/

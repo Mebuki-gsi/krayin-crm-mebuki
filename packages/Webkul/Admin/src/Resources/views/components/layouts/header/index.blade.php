@@ -6,12 +6,7 @@
         <x-admin::layouts.sidebar.mobile />
 
         <a href="{{ route('admin.dashboard.index') }}">
-            @if ($logo = core()->getConfigData('general.general.admin_logo.logo_image'))
-                <img class="h-10" id="logo-image" src="{{ Storage::url($logo) }}" alt="{{ config('app.name') }}" />
-            @else
-                <img class="h-10" src="{{ url('images/logo_mebuki.png') }}" id="logo-image"
-                    alt="{{ config('app.name') }}" />
-            @endif
+            <img class="h-10" id="logo-image" src="{{ url('images/logo_mebuki.png') }}" alt="{{ config('app.name') }}" />
         </a>
     </div>
 
@@ -50,7 +45,8 @@
                 @if ($user->image)
                     <button
                         class="flex h-9 w-9 cursor-pointer overflow-hidden rounded-full hover:opacity-80 focus:opacity-80">
-                        <img src="{{ $user->image_url }}" class="h-full w-full object-cover" />
+                        <img src="{{ $user->image_url }}" class="h-full w-full object-cover"
+                            onerror="this.parentElement.innerHTML='<span class=\'flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-pink-400 font-semibold leading-6 text-white\'>{{ substr($user->name, 0, 1) }}</span>'" />
                     </button>
                 @else
                     <button
@@ -64,7 +60,7 @@
                 <x-slot:content class="mt-2 border-t-0 !p-0">
                     <div
                         class="flex items-center gap-1.5 border border-x-0 border-b-gray-300 px-5 py-2.5 dark:border-gray-800">
-                        <img src="{{ url('cache/logo.png') }}" width="24" height="24" />
+                        <img src="{{ url('images/logo_mebuki.png') }}" width="24" height="24" />
 
                         <!-- Version -->
                         <p class="text-gray-400">
@@ -116,6 +112,13 @@
 
                     dark_logo: "{{ url('images/logo_mebuki.png') }}",
                 };
+            },
+
+            mounted() {
+                if (this.isDarkMode) {
+                    const img = document.getElementById('logo-image');
+                    if (img) img.src = this.dark_logo;
+                }
             },
 
             methods: {

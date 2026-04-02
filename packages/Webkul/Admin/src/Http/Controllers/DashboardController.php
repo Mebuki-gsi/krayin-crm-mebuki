@@ -1,4 +1,5 @@
 <?php
+// Test edit DashboardController
 
 namespace Webkul\Admin\Http\Controllers;
 
@@ -28,6 +29,7 @@ class DashboardController extends Controller
         'check-history' => 'getCheckHistory',
         'checked-clients' => 'getCheckedClients',
         'create-lead-from-client' => 'createLeadFromClient',
+        'client-orders' => 'getClientOrders',
     ];
 
 
@@ -50,11 +52,12 @@ class DashboardController extends Controller
      *
      * @return void
      */
-    public function __construct(
-        protected Dashboard $dashboardHelper,
+    public function __construct(protected
+        Dashboard $dashboardHelper,
         UserRepository $userRepository,
         LeadRepository $leadRepository
-    ) {
+        )
+    {
         $this->userRepository = $userRepository;
         $this->leadRepository = $leadRepository;
     }
@@ -73,10 +76,11 @@ class DashboardController extends Controller
         $managers = [];
         $users = collect([]); // Initialize users as a collection
         $startDate = $this->dashboardHelper->getStartDate(); // Define startDate
-        $endDate = $this->dashboardHelper->getEndDate();     // Define endDate
+        $endDate = $this->dashboardHelper->getEndDate(); // Define endDate
 
         if ($bigQueryService->isEnabled()) {
             $role = $bigQueryService->determineUserRole($user->email);
+            $userRegional = $this->getUserRegional($user->email);
 
             if ($role == 'gerente') {
                 // Fetch users (salespeople) belonging to this manager from BigQuery
@@ -86,24 +90,33 @@ class DashboardController extends Controller
                 $subordinateEmails[] = $user->email;
 
                 $users = $this->userRepository->whereIn('email', $subordinateEmails)->get();
-            } elseif ($role == 'vendedor') {
-                // Salespeople should not be able to filter other users
-                $users = collect([]);
-                $managers = [];
-                $defaultUserId = $user->id;
-            } else {
-                // Admin: can see all users OR filter by manager
-                $users = $this->userRepository->all();
-                $managers = $bigQueryService->getManagers();
-            }
-        } else {
-            // Non-BigQuery logic
-            $users = $this->userRepository->all();
 
-            if ($user->view_permission == 'individual') {
-                $users = collect([]); // Hide dropdown
+                // Format each user name to include regional info
+                foreach ($users as $u) {
+                    $u->name = $u->name . ($userRegional ? ' - ' . $userRegional : '');
+                }
+
+                // If manager, they only see their regional's people, so no need for general manager filter
+                $managers = [];
+            }
+            else {
+                // Vendedor or other: Salespeople see only themselves
+                // Format name with regional info
+                $user->name = $user->name . ($userRegional ? ' - ' . $userRegional : '');
+                $users = collect([$user]);
                 $managers = [];
                 $defaultUserId = $user->id;
+            }
+        }
+        else {
+            // Non-BigQuery logic (Standard Krayin)
+            if ($user->view_permission == 'individual') {
+                $users = collect([$user]);
+                $managers = [];
+                $defaultUserId = $user->id;
+            }
+            else {
+                $users = $this->userRepository->all();
             }
         }
 
@@ -120,13 +133,43 @@ class DashboardController extends Controller
     }
 
     /**
+     * Get user regional info from BigQuery (Local Fallback).
+     * 
+     * @param  string  $email
+     * @return string|null
+     */
+    private function getUserRegional($email)
+    {
+        $bigQueryService = app('bigquery');
+        $email = strtolower($email);
+
+        return \Illuminate\Support\Facades\Cache::remember('bq_regional_' . $email, 3600, function () use ($bigQueryService, $email) {
+            $projectId = env('BIGQUERY_PROJECT_ID');
+            $dataset = env('BIGQUERY_REVENUE_DATASET');
+            $table = env('BIGQUERY_REVENUE_TABLE');
+
+            if (!$dataset || !$table) {
+                return null;
+            }
+
+            $query = "SELECT ANY_VALUE(GERENCIA_REGIONAL) as regional 
+                      FROM `{$projectId}.{$dataset}.{$table}`
+                      WHERE LOWER(EMAIL_REP) = @email OR LOWER(EMAIL_REGIONAL_METAS) = @email LIMIT 1";
+
+            $results = $bigQueryService->runQuery($query, ['email' => $email]);
+
+            return $results[0]['regional'] ?? null;
+        });
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function stats()
     {
-        $stats = $this->dashboardHelper->{$this->typeFunctions[request()->query('type')]}();
+        $stats = $this->dashboardHelper->{ $this->typeFunctions[request()->query('type')]}();
 
         return response()->json([
             'statistics' => $stats,

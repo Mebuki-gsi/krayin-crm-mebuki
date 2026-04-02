@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
     content: ["./src/Resources/**/*.blade.php", "./src/Resources/**/*.js"],
 
     theme: {
@@ -44,6 +44,11 @@ module.exports = {
     safelist: [
         {
             pattern: /icon-/,
-        }
+        },
+        // Dashboard risk-analysis cards — bg/border/text colors used in :class Vue bindings
+        {
+            pattern: /^(bg|border|text|ring)-(emerald|indigo|green|blue|orange|gray)-(200|400|500|600|700|900)$/,
+            variants: ['dark', 'hover'],
+        },
     ]
 };

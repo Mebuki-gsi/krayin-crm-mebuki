@@ -204,22 +204,26 @@ class Dashboard
     public function getCheckHistory(): array
     {
         $user = auth()->user();
-        $startDate = $this->getStartDate();
-        $endDate = $this->getEndDate();
+
+        // Always show the full current month, regardless of the dashboard filter dates.
+        // Using now() creates independent Carbon instances (avoids shared-reference mutations).
+        $startDate = now()->startOfMonth()->startOfDay();
+        $endDate   = now();
 
         // Get daily counts by classification
         $dailyData = \Webkul\Core\Models\ClientWorkTracking::where('user_id', $user->id)
             ->where('is_checked', true)
-            ->whereBetween('checked_at', [$startDate, $endDate->endOfDay()])
+            ->whereBetween('checked_at', [$startDate->copy(), $endDate->copy()->endOfDay()])
             ->selectRaw('DATE(checked_at) as date, classification, COUNT(*) as count')
             ->groupByRaw('DATE(checked_at), classification')
             ->orderBy('date')
             ->get();
 
-        // Prepare structure
+        // Prepare structure — iterate with a copy so $startDate / $endDate stay unmodified
         $dates = [];
         $current = $startDate->copy();
-        while ($current <= $endDate) {
+        $loopEnd = $endDate->copy();
+        while ($current <= $loopEnd) {
             $dates[$current->format('Y-m-d')] = $current->format('d/m');
             $current->addDay();
         }
@@ -233,16 +237,16 @@ class Dashboard
             'SEM_HISTORICO'
         ];
 
-        // Initialize datasets
+        // Initialize all days with zero for every classification
         $datasets = [];
         foreach ($classifications as $cls) {
             $datasets[$cls] = array_fill_keys(array_keys($dates), 0);
         }
 
-        // Fill data
+        // Fill actual contacts made per day per classification
         foreach ($dailyData as $row) {
             $date = $row->date;
-            $cls = $row->classification ?? 'SEM_HISTORICO';
+            $cls  = $row->classification ?? 'SEM_HISTORICO';
             if (isset($datasets[$cls][$date])) {
                 $datasets[$cls][$date] = (int) $row->count;
             }
@@ -254,16 +258,15 @@ class Dashboard
             $formattedDatasets[$cls] = array_values($data);
         }
 
-        // Get today's count
         $todayCount = \Webkul\Core\Models\ClientWorkTracking::where('user_id', $user->id)
             ->where('is_checked', true)
             ->whereDate('checked_at', now()->toDateString())
             ->count();
 
         return [
-            'labels' => array_values($dates),
-            'datasets' => $formattedDatasets,
-            'today_count' => $todayCount,
+            'labels'       => array_values($dates),
+            'datasets'     => $formattedDatasets,
+            'today_count'  => $todayCount,
             'total_period' => $dailyData->sum('count'),
         ];
     }
@@ -413,5 +416,29 @@ class Dashboard
                 'message' => 'Erro ao criar lead: ' . $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Get client orders from BigQuery.
+     * Returns all orders for a specific CNPJ.
+     */
+    public function getClientOrders(): array
+    {
+        $bigQueryService = app('bigquery');
+
+        if (!$bigQueryService->isEnabled()) {
+            return [];
+        }
+
+        $cnpj = request('cnpj');
+
+        if (!$cnpj) {
+            return [];
+        }
+
+        // Remove any formatting from CNPJ (keep only numbers)
+        $cnpjClean = preg_replace('/[^0-9]/', '', $cnpj);
+
+        return $bigQueryService->getClientOrders($cnpjClean);
     }
 }

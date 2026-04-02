@@ -236,8 +236,8 @@
                     </thead>
                     <tbody>
                         <tr v-for="(client, index) in paginatedClients" :key="client.cnpj" :class="[
-                                            'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
-                                        ]">
+                                            'border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer'
+                                        ]" @dblclick="openClientDetails(client)">
                             <td class="p-2">
                                 <input type="checkbox" :checked="checkedClients[client.cnpj]" @change="toggleClient(client)"
                                     class="rounded">
@@ -326,22 +326,30 @@
     </template>
 
     <!-- Client Detail Modal -->
-    <div v-if="selectedClient" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-        @click.self="closeModal">
-        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div
-                class="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
+    <div v-if="selectedClient" style="position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 1rem;" @wheel.stop @touchmove.stop>
+        
+        <!-- Backdrop -->
+        <div style="position: absolute; inset: 0; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 99999;" @click="closeModal"></div>
+        
+        <!-- Modal Panel -->
+        <div class="bg-white dark:bg-gray-900 shadow-2xl" style="position: relative; z-index: 100000; display: flex; flex-direction: column; width: 100%; max-width: 850px; max-height: 90vh; border-radius: 12px; overflow: hidden; margin-left: auto; margin-right: auto;">
+            
+            <!-- Header (Fixed at top of modal) -->
+            <div class="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900" style="flex-shrink: 0; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
                 <h3 class="font-semibold text-lg text-gray-900 dark:text-white">Detalhes do Cliente</h3>
-                <button @click="closeModal"
-                    class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xl">&times;</button>
+                <button @click="closeModal" class="text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800" style="border-radius: 9999px; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="Fechar">
+                    <span style="font-size: 1.5rem; line-height: 1;">&times;</span>
+                </button>
             </div>
-            <div class="p-4 space-y-4">
+            
+            <!-- Scrollable Body -->
+            <div style="padding: 1.5rem; overflow-y: auto; flex: 1;">
                 <!-- Client Info -->
                 <div class="space-y-2">
                     <h4 class="font-medium text-gray-900 dark:text-white">@{{ selectedClient.razao }}</h4>
                     <p class="text-sm text-gray-600 dark:text-gray-300">CNPJ: @{{ selectedClient.cnpj }}</p>
 
-                    <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                         <div>
                             <span class="text-gray-500 dark:text-gray-400">Segmento:</span>
                             <span class="ml-1 text-gray-800 dark:text-gray-200">@{{ selectedClient.segmento || '-' }}</span>
@@ -355,48 +363,48 @@
                 </div>
 
                 <!-- Contact Info -->
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-3">
                     <h5 class="font-medium text-sm text-gray-800 dark:text-white">Contato</h5>
-                    <div class="text-sm text-gray-600 dark:text-gray-300">
+                    <div class="text-sm text-gray-600 dark:text-gray-300 flex flex-col sm:flex-row sm:gap-4 gap-1">
                         <p v-if="selectedClient.telefone">📞 @{{ selectedClient.telefone }}</p>
                         <p v-if="selectedClient.email">✉️ @{{ selectedClient.email }}</p>
                     </div>
                     <button @click="createLead(selectedClient); closeModal();"
-                        class="w-full rounded bg-blue-600 text-white py-2 text-sm hover:bg-blue-700 flex items-center justify-center gap-2">
+                        class="w-full sm:w-auto rounded bg-blue-600 text-white px-4 py-2 text-sm hover:bg-blue-700 flex items-center justify-center gap-2 transition-colors">
                         ➕ Criar Lead no Kanban
                     </button>
                 </div>
 
                 <!-- Purchase Stats -->
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 text-center">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 text-center flex flex-col justify-center">
                         <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">@{{ selectedClient.total_pedidos }}
                         </p>
                         <p class="text-xs text-blue-600/70 dark:text-blue-300">Total de Pedidos</p>
                     </div>
-                    <div class="bg-green-50 dark:bg-green-900/30 rounded-lg p-3 text-center">
-                        <p class="text-2xl font-bold text-green-600 dark:text-green-400">R$ @{{
+                    <div class="bg-green-50 dark:bg-green-900/30 rounded-lg p-3 text-center flex flex-col justify-center overflow-hidden">
+                        <p class="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 truncate" :title="formatCurrency(selectedClient.valor_total)">R$ @{{
                             formatCurrency(selectedClient.valor_total) }}
                         </p>
                         <p class="text-xs text-green-600/70 dark:text-green-300">Valor Total</p>
                     </div>
-                    <div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-3 text-center">
-                        <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">R$ @{{
+                    <div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-3 text-center flex flex-col justify-center overflow-hidden">
+                        <p class="text-xl sm:text-2xl font-bold text-purple-600 dark:text-purple-400 truncate" :title="formatCurrency(selectedClient.ticket_medio)">R$ @{{
                             formatCurrency(selectedClient.ticket_medio) }}
                         </p>
                         <p class="text-xs text-purple-600/70 dark:text-purple-300">Ticket Médio</p>
                     </div>
                     <div :class="[
-                                                                        'rounded-lg p-3 text-center',
-                                                                        selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
-                                                                        selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
-                                                                        'bg-green-50 dark:bg-green-900/30'
-                                                                    ]">
+                                'rounded-lg p-3 text-center flex flex-col justify-center',
+                                selectedClient.dias_sem_compra > 90 ? 'bg-red-50 dark:bg-red-900/30' :
+                                selectedClient.dias_sem_compra > 30 ? 'bg-yellow-50 dark:bg-yellow-900/30' :
+                                'bg-green-50 dark:bg-green-900/30'
+                            ]">
                         <p :class="[
-                                                                            'text-2xl font-bold',
-                                                                            selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
-                                                                            selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
-                                                                        ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
+                                    'text-2xl font-bold',
+                                    selectedClient.dias_sem_compra > 90 ? 'text-red-600 dark:text-red-400' :
+                                    selectedClient.dias_sem_compra > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
+                                ]">@{{ selectedClient.dias_sem_compra || '∞' }}</p>
                         <p class="text-xs text-gray-600 dark:text-gray-300">Dias s/ Compra</p>
                     </div>
                 </div>
@@ -410,6 +418,82 @@
                     </span>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">@{{
                         getTooltip(selectedClient.classificacao_risco) }}</p>
+                </div>
+
+                <!-- Pedidos do Cliente -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h5 class="font-medium text-sm text-gray-800 dark:text-white">
+                            📦 Histórico de Pedidos
+                            <span v-if="clientOrders.length > 0" class="ml-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                                @{{ groupedOrders.length }} pedidos · @{{ clientOrders.length }} itens
+                            </span>
+                        </h5>
+                    </div>
+
+                    <!-- Loading Shimmer -->
+                    <div v-if="isLoadingOrders" class="space-y-2">
+                        <div v-for="i in 3" :key="i" class="shimmer h-12 w-full rounded"></div>
+                    </div>
+
+                    <!-- Grouped Orders Accordion -->
+                    <div v-else-if="clientOrders.length > 0" class="space-y-2">
+                        <!-- Order Group -->
+                        <div v-for="(group, gIdx) in paginatedOrders" :key="group.pedido"
+                            class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <!-- Order Header (clickable) -->
+                            <div @click="toggleOrderGroup(group.pedido)"
+                                class="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs text-gray-400 transition-transform" :class="expandedOrders[group.pedido] ? 'rotate-90' : ''">▶</span>
+                                    <span class="font-mono text-xs font-medium text-gray-700 dark:text-gray-300">@{{ group.pedido }}</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">@{{ formatDate(group.data_emissao) }}</span>
+                                    <span class="text-xs bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded">@{{ group.items.length }} itens</span>
+                                </div>
+                                <span class="text-xs font-semibold text-green-600 dark:text-green-400">R$ @{{ formatCurrency(group.total) }}</span>
+                            </div>
+                            <!-- Order Items (expandable) -->
+                            <div v-show="expandedOrders[group.pedido]">
+                                <table class="w-full text-xs">
+                                    <thead class="bg-gray-100/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400">
+                                        <tr>
+                                            <th class="p-2 font-medium text-left w-24">Código</th>
+                                            <th class="p-2 font-medium text-left">Produto</th>
+                                            <th class="p-2 font-medium text-right w-16">Qtd</th>
+                                            <th class="p-2 font-medium text-right w-24">Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                        <tr v-for="(item, iIdx) in group.items" :key="iIdx" class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                            <td class="p-2 text-gray-600 dark:text-gray-400 font-mono">@{{ item.codigo_produto }}</td>
+                                            <td class="p-2 text-gray-800 dark:text-gray-200">@{{ item.produto }}</td>
+                                            <td class="p-2 text-right text-gray-800 dark:text-gray-200">@{{ item.quantidade }}</td>
+                                            <td class="p-2 text-right font-medium text-green-600 dark:text-green-400">R$ @{{ formatCurrency(item.valor_total) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Orders Pagination -->
+                        <div v-if="ordersTotalPages > 1" class="flex items-center justify-between pt-2">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                Pág. @{{ ordersCurrentPage }} de @{{ ordersTotalPages }}
+                            </p>
+                            <div class="flex gap-1">
+                                <button @click="ordersCurrentPage--" :disabled="ordersCurrentPage <= 1"
+                                    class="rounded px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white disabled:opacity-50">⬅️</button>
+                                <button @click="ordersCurrentPage++" :disabled="ordersCurrentPage >= ordersTotalPages"
+                                    class="rounded px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white disabled:opacity-50">➡️</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-else class="flex flex-col items-center justify-center py-8 text-gray-500 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <span class="text-2xl mb-1">📦</span>
+                        <p class="text-xs">Nenhum pedido encontrado</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -433,6 +517,11 @@
                     perPage: 10,
                     checkedClients: {},
                     selectedClient: null,
+                    clientOrders: [],
+                    isLoadingOrders: false,
+                    expandedOrders: {},
+                    ordersCurrentPage: 1,
+                    ordersPerPage: 15,
                     chartInstance: null,
                     currentFilters: {},
                     resizing: null,
@@ -494,6 +583,33 @@
                 allChecked() {
                     return this.paginatedClients.length > 0 &&
                         this.paginatedClients.every(c => this.checkedClients[c.cnpj]);
+                },
+
+                groupedOrders() {
+                    const groups = {};
+                    for (const order of this.clientOrders) {
+                        const key = order.pedido;
+                        if (!groups[key]) {
+                            groups[key] = {
+                                pedido: order.pedido,
+                                data_emissao: order.data_emissao,
+                                total: 0,
+                                items: []
+                            };
+                        }
+                        groups[key].items.push(order);
+                        groups[key].total += (order.valor_total || 0);
+                    }
+                    return Object.values(groups);
+                },
+
+                paginatedOrders() {
+                    const start = (this.ordersCurrentPage - 1) * this.ordersPerPage;
+                    return this.groupedOrders.slice(start, start + this.ordersPerPage);
+                },
+
+                ordersTotalPages() {
+                    return Math.ceil(this.groupedOrders.length / this.ordersPerPage) || 1;
                 }
             },
 
@@ -536,6 +652,40 @@
                             this.report = { clients: [], summary: {}, total: 0, ticket_threshold: 0, last_updated: null };
                             this.isLoading = false;
                         });
+                },
+
+                openClientDetails(client) {
+                    this.selectedClient = client;
+                    this.clientOrders = [];
+                    this.isLoadingOrders = true;
+                    this.expandedOrders = {};
+                    this.ordersCurrentPage = 1;
+
+                    // Busca os pedidos usando CNPJ sem formatação
+                    var params = Object.assign({}, this.currentFilters);
+                    params.type = 'client-orders';
+                    // Remove formatação do CNPJ (mantém apenas números)
+                    params.cnpj = client.cnpj.replace(/[.\-\/]/g, '');
+
+                    this.$axios.get("{{ route('admin.dashboard.stats') }}", { params })
+                        .then(response => {
+                            this.clientOrders = response.data.statistics || [];
+                        })
+                        .catch(error => console.error('Load client orders error:', error))
+                        .finally(() => {
+                            this.isLoadingOrders = false;
+                        });
+                },
+
+                closeModal() {
+                    this.selectedClient = null;
+                    this.clientOrders = [];
+                    this.expandedOrders = {};
+                    this.ordersCurrentPage = 1;
+                },
+
+                toggleOrderGroup(pedido) {
+                    this.expandedOrders = { ...this.expandedOrders, [pedido]: !this.expandedOrders[pedido] };
                 },
 
                 loadCheckedClients() {
@@ -813,6 +963,8 @@
                         'ATIVO_FREQUENTE': 'Ativo Frequente',
                         'ATIVO_REGULAR': 'Ativo Regular',
                         'RISCO_INATIVACAO': 'Risco Inativação',
+                        'OPORTUNIDADE_RECUPERACAO': 'Oportunidade Recuperação',
+                        'INATIVO_BAIXO_POTENCIAL': 'Inativo Baixo Potencial',
                         'SEM_HISTORICO': 'Sem Histórico'
                     };
                     return labels[key] || key;
@@ -823,6 +975,8 @@
                         'ATIVO_FREQUENTE': '✅ Freq',
                         'ATIVO_REGULAR': '📊 Reg',
                         'RISCO_INATIVACAO': '⚠️ Risco',
+                        'OPORTUNIDADE_RECUPERACAO': '🔄 Recup',
+                        'INATIVO_BAIXO_POTENCIAL': '🛑 Inat/BP',
                         'SEM_HISTORICO': '❓ S/Hist'
                     };
                     return labels[key] || key;
@@ -833,6 +987,8 @@
                         'ATIVO_FREQUENTE': 'Cliente comprou nos últimos 30 dias. Manter relacionamento ativo.',
                         'ATIVO_REGULAR': 'Cliente comprou entre 31-90 dias. Atenção para não perder engajamento.',
                         'RISCO_INATIVACAO': 'Mais de 90 dias sem compra. Prioridade alta para contato!',
+                        'OPORTUNIDADE_RECUPERACAO': 'Cliente tem histórico mas não está ativo ou precisa de resgate.',
+                        'INATIVO_BAIXO_POTENCIAL': 'Cliente na carteira sem histórico de vendas registrado.',
                         'SEM_HISTORICO': 'Cliente novo ou sem histórico de compras registrado.'
                     };
                     return tooltips[key] || '';
@@ -843,6 +999,8 @@
                         'ATIVO_FREQUENTE': 'bg-green-500 text-white border-green-600',
                         'ATIVO_REGULAR': 'bg-blue-500 text-white border-blue-600',
                         'RISCO_INATIVACAO': 'bg-orange-500 text-white border-orange-600',
+                        'OPORTUNIDADE_RECUPERACAO': 'bg-purple-500 text-white border-purple-600',
+                        'INATIVO_BAIXO_POTENCIAL': 'bg-gray-500 text-white border-gray-600',
                         'SEM_HISTORICO': 'bg-gray-200 dark:bg-gray-400 text-gray-900 border-gray-400'
                     };
                     return classes[key] || 'bg-gray-200 text-gray-800 border-gray-400';
@@ -853,6 +1011,8 @@
                         'ATIVO_FREQUENTE': 'bg-green-500 text-white',
                         'ATIVO_REGULAR': 'bg-blue-500 text-white',
                         'RISCO_INATIVACAO': 'bg-orange-500 text-white',
+                        'OPORTUNIDADE_RECUPERACAO': 'bg-purple-500 text-white',
+                        'INATIVO_BAIXO_POTENCIAL': 'bg-gray-500 text-white',
                         'SEM_HISTORICO': 'bg-gray-300 text-gray-900'
                     };
                     return classes[key] || 'bg-gray-200 text-gray-800';
