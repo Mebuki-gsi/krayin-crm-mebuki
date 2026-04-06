@@ -11,9 +11,30 @@
 |
 */
 
-$app = new Illuminate\Foundation\Application(
-    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
-);
+/*
+|--------------------------------------------------------------------------
+| Ensure Storage Directories Exist (before anything else)
+|--------------------------------------------------------------------------
+*/
+$basePath = $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__);
+$storageDirs = [
+    $basePath . '/storage/framework/cache/data',
+    $basePath . '/storage/framework/sessions',
+    $basePath . '/storage/framework/views',
+    $basePath . '/storage/framework/testing',
+    $basePath . '/storage/logs',
+    $basePath . '/storage/app/public',
+    $basePath . '/bootstrap/cache',
+];
+
+foreach ($storageDirs as $dir) {
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0777, true);
+    }
+    @chmod($dir, 0777);
+}
+
+$app = new Illuminate\Foundation\Application($basePath);
 
 /*
 |--------------------------------------------------------------------------
