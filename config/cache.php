@@ -51,7 +51,13 @@ return [
 
         'file' => [
             'driver' => 'file',
-            'path'   => storage_path('framework/cache/data'),
+            'path'   => (function() {
+                $path = storage_path('framework/cache/data');
+                if (!is_dir($path)) {
+                    @mkdir($path, 0775, true);
+                }
+                return $path;
+            })(),
         ],
 
         'memcached' => [
