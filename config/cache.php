@@ -52,10 +52,27 @@ return [
         'file' => [
             'driver' => 'file',
             'path'   => (function() {
+                // Try storage first
                 $path = storage_path('framework/cache/data');
+
+                // Create directory if it doesn't exist
                 if (!is_dir($path)) {
-                    @mkdir($path, 0775, true);
+                    @mkdir($path, 0777, true);
                 }
+
+                // Test if writable
+                $testFile = $path . '/.write_test_' . time();
+                if (@file_put_contents($testFile, 'test') === false) {
+                    // Not writable, fallback to /tmp
+                    $path = '/tmp/laravel_cache';
+                    if (!is_dir($path)) {
+                        @mkdir($path, 0777, true);
+                    }
+                } else {
+                    // Cleanup test file
+                    @unlink($testFile);
+                }
+
                 return $path;
             })(),
         ],

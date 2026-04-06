@@ -59,7 +59,30 @@ return [
     |
     */
 
-    'files' => storage_path('framework/sessions'),
+    'files' => (function() {
+        // Try storage first
+        $path = storage_path('framework/sessions');
+
+        // Create directory if it doesn't exist
+        if (!is_dir($path)) {
+            @mkdir($path, 0777, true);
+        }
+
+        // Test if writable
+        $testFile = $path . '/.write_test_' . time();
+        if (@file_put_contents($testFile, 'test') === false) {
+            // Not writable, fallback to /tmp
+            $path = '/tmp/laravel_sessions';
+            if (!is_dir($path)) {
+                @mkdir($path, 0777, true);
+            }
+        } else {
+            // Cleanup test file
+            @unlink($testFile);
+        }
+
+        return $path;
+    })(),
 
     /*
     |--------------------------------------------------------------------------

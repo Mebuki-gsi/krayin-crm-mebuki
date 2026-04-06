@@ -28,17 +28,32 @@ return [
     |
     */
 
-    'compiled' => env('VIEW_CACHE_DISABLED', false)
-        ? false  // Disable view caching (compile on-the-fly)
-        : env(
-            'VIEW_COMPILED_PATH',
-            (function() {
-                $path = storage_path('framework/views');
+    'compiled' => env(
+        'VIEW_COMPILED_PATH',
+        (function() {
+            // Try storage first
+            $path = storage_path('framework/views');
+
+            // Create directory if it doesn't exist
+            if (!is_dir($path)) {
+                @mkdir($path, 0777, true);
+            }
+
+            // Test if writable
+            $testFile = $path . '/.write_test_' . time();
+            if (@file_put_contents($testFile, 'test') === false) {
+                // Not writable, fallback to /tmp
+                $path = '/tmp/laravel_views';
                 if (!is_dir($path)) {
                     @mkdir($path, 0777, true);
                 }
-                return $path;
-            })()
-        ),
+            } else {
+                // Cleanup test file
+                @unlink($testFile);
+            }
+
+            return $path;
+        })()
+    ),
 
 ];
