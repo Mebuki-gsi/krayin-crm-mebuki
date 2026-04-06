@@ -28,15 +28,17 @@ return [
     |
     */
 
-    'compiled' => env(
-        'VIEW_COMPILED_PATH',
-        (function() {
-            $path = storage_path('framework/views');
-            if (!is_dir($path)) {
-                @mkdir($path, 0775, true);
-            }
-            return $path;
-        })()
-    ),
+    'compiled' => env('VIEW_CACHE_DISABLED', false)
+        ? false  // Disable view caching (compile on-the-fly)
+        : env(
+            'VIEW_COMPILED_PATH',
+            (function() {
+                $path = storage_path('framework/views');
+                if (!is_dir($path)) {
+                    @mkdir($path, 0777, true);
+                }
+                return $path;
+            })()
+        ),
 
 ];

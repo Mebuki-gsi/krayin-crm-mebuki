@@ -1,0 +1,35 @@
+# Node modules
+node_modules/
+
+# Storage (let container create this)
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+
+# Bootstrap cache
+bootstrap/cache/*
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Development
+.env.example
+.editorconfig
+.styleci.yml
+README.md
+CHANGELOG.md
+
+# Tests
+tests/
+phpunit.xml
+
+# Documentation
+docs/
+obsidian-vault/
+
+# Backup files
+*.sql
+krayin_backup.sql
