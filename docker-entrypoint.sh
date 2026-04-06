@@ -13,10 +13,11 @@ mkdir -p storage/logs
 mkdir -p storage/app/public
 mkdir -p bootstrap/cache
 
-# Definir permissões
+# Definir permissões (777 para garantir escrita em qualquer contexto Docker)
 echo "🔒 Setting permissions..."
-chmod -R 775 storage
-chmod -R 775 bootstrap/cache
+chmod -R 777 storage
+chmod -R 777 bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
 # Limpar caches antigos
 echo "🧹 Clearing old caches..."
