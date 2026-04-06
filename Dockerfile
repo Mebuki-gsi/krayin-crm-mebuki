@@ -1,5 +1,8 @@
 FROM php:8.2-cli
 
+# Run as root to avoid permission issues
+USER root
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libzip-dev \
@@ -21,17 +24,6 @@ WORKDIR /var/www
 # Copy application files
 COPY . .
 
-# Create storage structure and set permissions
-RUN mkdir -p storage/framework/cache/data \
-    && mkdir -p storage/framework/sessions \
-    && mkdir -p storage/framework/views \
-    && mkdir -p storage/framework/testing \
-    && mkdir -p storage/logs \
-    && mkdir -p storage/app/public \
-    && mkdir -p bootstrap/cache \
-    && chmod -R 777 storage \
-    && chmod -R 777 bootstrap/cache
-
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
@@ -40,4 +32,5 @@ RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 8000
 
+# Run as root to ensure write permissions
 ENTRYPOINT ["/var/www/docker-entrypoint.sh"]

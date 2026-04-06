@@ -2,6 +2,8 @@
 set -e
 
 echo "🚀 Starting Krayin CRM..."
+echo "👤 Running as user: $(whoami)"
+echo "📂 Current directory: $(pwd)"
 
 # Criar estrutura de diretórios se não existir
 echo "📁 Creating storage directories..."
@@ -13,11 +15,19 @@ mkdir -p storage/logs
 mkdir -p storage/app/public
 mkdir -p bootstrap/cache
 
-# Definir permissões (777 para garantir escrita em qualquer contexto Docker)
-echo "🔒 Setting permissions..."
-chmod -R 777 storage
-chmod -R 777 bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+# Definir permissões (777 para garantir escrita)
+echo "🔒 Setting permissions to 777..."
+chmod -R 777 storage 2>/dev/null || true
+chmod -R 777 bootstrap/cache 2>/dev/null || true
+
+# Debug: verificar se diretório views existe e suas permissões
+echo "🔍 Checking storage/framework/views..."
+ls -la storage/framework/views 2>/dev/null || echo "⚠️ views directory not accessible"
+stat storage/framework/views 2>/dev/null || echo "⚠️ Cannot stat views directory"
+
+# Tentar criar um arquivo de teste
+echo "🧪 Testing write permissions..."
+touch storage/framework/views/.test 2>/dev/null && rm storage/framework/views/.test && echo "✅ Write test SUCCESS" || echo "❌ Write test FAILED"
 
 # Limpar caches antigos
 echo "🧹 Clearing old caches..."
