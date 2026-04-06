@@ -18,6 +18,28 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# Copy application files
+COPY . .
+
+# Create storage directories and set permissions
+RUN mkdir -p storage/framework/cache/data \
+    && mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/views \
+    && mkdir -p storage/framework/testing \
+    && mkdir -p storage/logs \
+    && mkdir -p storage/app/public \
+    && mkdir -p bootstrap/cache \
+    && chmod -R 775 storage \
+    && chmod -R 775 bootstrap/cache
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Clear and cache config (optional, for production optimization)
+RUN php artisan config:cache || true \
+    && php artisan route:cache || true \
+    && php artisan view:cache || true
+
 EXPOSE 8000
 
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
